@@ -1,15 +1,19 @@
+```
+# Generate Keys
 API_SECRET_KEY=$(openssl rand -base64 42)
-
 RESEND_API_KEY=$(openssl rand -base64 42)
-
 CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
+```
 
+```
+# Create Namespace&Secret
 kubectl create namespace dify
-
 kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key 
+```
 
-
-helm template demo ./DifyOnAKS/charts/ \
+```
+# Helm Install Dify
+helm install demo ./DifyOnAKS/charts/ \
 --set nodeSelector.agentpool=dify \
 --set image.api.tag=latest \
 --set image.web.tag=latest \
@@ -38,3 +42,4 @@ helm template demo ./DifyOnAKS/charts/ \
 --set externalAzureBlobStorage.account='<storage_account_name>' \
 --set externalAzureBlobStorage.key='<access_key>' \
 --set externalAzureBlobStorage.container=dify 
+```
