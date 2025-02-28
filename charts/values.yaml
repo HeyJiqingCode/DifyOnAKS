@@ -1,0 +1,387 @@
+# Image configuration
+image:
+  api:
+    repository: langgenius/dify-api
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  web:    
+    repository: langgenius/dify-web
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  sandbox:
+    repository: langgenius/dify-sandbox
+    tag: "0.2.10"
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  proxy:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+
+  ssrfProxy:
+    repository: ubuntu/squid
+    tag: latest
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+
+
+# Dify API Configuration
+api:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  extraEnv:
+  # Apply your own Environment Variables if necessary.
+  # Variable defined here takes higher priority than those from `ConfigMap` generated given `.Values`
+  # The direct approach
+  # - name: LANG
+  #   value: "C.UTF-8"
+  #   - name: SECRET_KEY
+  # Use existing k8s secrets
+  #  - name: DB_PASSWORD
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: my-secret
+  #        key: DB_PASSWORD
+  - name: CHECK_UPDATE_URL
+  # Won't check for update if left empty
+  #   value: https://updates.dify.ai
+    value: ""
+  - name: CODE_MAX_NUMBER
+    value: "9223372036854775807"
+  - name: CODE_MIN_NUMBER
+    value: "-9223372036854775808"
+  - name: CODE_MAX_STRING_LENGTH
+    value: "80000"
+  - name: TEMPLATE_TRANSFORM_MAX_LENGTH
+    value: "80000"
+  - name: CODE_MAX_STRING_ARRAY_LENGTH
+    value: "30"
+  - name: CODE_MAX_OBJECT_ARRAY_LENGTH
+    value: "30"
+  - name: CODE_MAX_NUMBER_ARRAY_LENGTH
+    value: "1000"
+  service:
+    port: 5001
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+  logLevel: INFO
+  url:
+    # The backend URL of the console API, used to concatenate the authorization callback.
+    # If empty, it is the same domain. Example: https://api.console.dify.ai
+    consoleApi: ""
+    # The front-end URL of the console web, used to concatenate some front-end addresses and for CORS configuration use.
+    # If empty, it is the same domain. Example: https://console.dify.ai
+    consoleWeb: ""
+    # Service API Url, used to display Service API Base Url to the front-end.
+    # If empty, it is the same domain. Example: https://api.dify.ai
+    serviceApi: ""
+    # WebApp API backend Url, used to declare the back-end URL for the front-end API.
+    # If empty, it is the same domain. Example: https://app.dify.ai
+    appApi: ""
+    # WebApp Url, used to display WebAPP API Base Url to the front-end. If empty, it is the same domain. Example: https://api.app.dify.ai
+    appWeb: ""
+    # File preview or download URL prefix, used to display the file preview
+    # or download URL to the front-end or as a multi-modal model input;
+    # In order to prevent others from forging, the image preview URL is signed and has a 5-minute expiration time.
+    files: ""
+  mail:
+    # default email sender from email address, if not not given specific address
+    defaultSender: 'YOUR EMAIL FROM (eg: no-reply <no-reply@dify.ai>)'
+    # Mail type, supported values are `smtp`, `resend` https://docs.dify.ai/getting-started/install-self-hosted/environments#mail-related-configuration
+    type: "resend"
+    resend:
+      # Resend API Key
+      apiKey: "xxxx"
+      # Resend API URL
+      apiUrl: https://api.resend.com
+    # SMTP Configuration
+    smtp:
+      server: "smtp.server.com"
+      port: 465
+      username: "YOUR EMAIL"
+      password: "YOUR EMAIL PASSWORD"
+      tls:
+        enabled: true
+        optimistic: false
+  # When enabled, migrations will be executed prior to application startup and the application will start after the migrations have completed.
+  migration: true
+  # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
+  secretKey: 'sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U'
+  ## Storage for `api` and `worker`
+  ## Ignored if `.Values.externalS3.enabled` is true
+  ##
+  persistence:
+    mountPath: "/app/api/storage"
+    annotations:
+      helm.sh/resource-policy: keep
+    persistentVolumeClaim:
+      existingClaim: ""
+      ## Dify App Data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.
+      ## ReadWriteMany access mode required for `api` and `worker`
+      ##
+      storageClass: azurefile-csi
+      accessModes: ReadWriteMany
+      size: 5Gi
+      subPath: ""
+
+
+# Dify Proxy Configuration
+proxy:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  log:
+    persistence:
+      ## If true, create/use a Persistent Volume Claim for log
+      ## If false, flush logs to stdout & stderr
+      ##
+      enabled: false
+      mountPath: "/var/log/nginx"
+      annotations:
+        helm.sh/resource-policy: keep
+      persistentVolumeClaim:
+        existingClaim: ""
+        ## Nginx Logs Persistent Volume Storage Class
+        ## If defined, storageClassName: <storageClass>
+        ## If set to "-", storageClassName: "", which disables dynamic provisioning
+        ## If undefined (the default) or set to null, no storageClassName spec is
+        ##   set, choosing the default provisioner.
+        ## ReadWriteMany access mode required for nginx
+        ##
+        storageClass: azurefile-csi
+        accessModes: ReadWriteMany
+        size: 1Gi
+        subPath: ""
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+
+
+# Dify Portal Configuration
+web:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  - name: EDITION
+    value: "SELF_HOSTED"
+  service:
+    port: 3000
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+
+# Dify Sandbox Configuration
+sandbox:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  - name: WORKER_TIMEOUT
+    value: "15"
+  service:
+    port: 8194
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  auth:
+    apiKey: "dify-sandbox"
+  privileged:
+    false
+
+
+# Dify SSRF Proxy Configuration
+ssrfProxy:
+  enabled: false
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  log:
+    persistence:
+      ## If true, create/use a Persistent Volume Claim for log
+      ## If false, flush logs to stdout & stderr
+      ##
+      enabled: false
+      mountPath: "/var/log/squid"
+      annotations:
+        helm.sh/resource-policy: keep
+      persistentVolumeClaim:
+        existingClaim: ""
+        ## Squid Logs Persistent Volume Storage Class
+        ## If defined, storageClassName: <storageClass>
+        ## If set to "-", storageClassName: "", which disables dynamic provisioning
+        ## If undefined (the default) or set to null, no storageClassName spec is
+        ##   set, choosing the default provisioner.
+        ## ReadWriteMany access mode required for squid
+        ##
+        storageClass: azurefile-csi
+        accessModes: ReadWriteMany
+        size: 1Gi
+        subPath: ""
+  service:
+    port: 3128
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+
+
+# Self-hosted Services Configuration
+postgresql:
+  # PostgreSQL Configuration
+  enabled: false
+
+redis:
+  # Redis Configuration
+  enabled: false
+
+weaviate:
+  # Weaviate Configuration
+  enabled: false
+
+
+# Global Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: "azure-application-gateway"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    # nginx.ingress.kubernetes.io/proxy-body-size: 15m
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # - host: dify-example2.local
+    #   paths:
+    #     - path: /
+    #       pathType: Prefix
+  http:
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
+  hosts: []
+  tls: []
+
+
+# External Services Configuration
+externalPostgres:
+  # Azure Database for PostgresSQL
+  enabled: true
+  username: "postgres"
+  password: "difyai123456"
+  address: localhost
+  port: 5432
+  dbName: dify
+  maxOpenConns: 20
+  maxIdleConns: 5
+
+externalPgvector:
+  # Azure Database for PostgresSQL Vector Extensions
+  enabled: true
+  username: "postgres"
+  password: "difyai123456"
+  address: "pgvector"
+  port: 5432
+  dbName: dify
+
+externalRedis:
+  # Azure Cache for Redis
+  enabled: true
+  host: "redis.example"
+  port: 6379
+  username: ""
+  password: "difyai123456"
+  useSSL: false
+
+externalAzureBlobStorage:
+  # Azure Storage Account(Blob)
+  enabled: false
+  url: 'https://<your_account_name>.blob.core.windows.net'
+  account: "xxx"
+  key: "difyai"
+  container: "difyai-container"
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+
+# Global node selector
+# If set, this will apply to all dify components
+nodeSelector: {}
+
+
+# Global tolerations
+# If set, this will apply to all dify components
+tolerations: []
+
+
+# Global affinity
+# If set, this will apply to all dify components
+affinity: {}
