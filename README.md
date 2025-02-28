@@ -1,5 +1,7 @@
 API_SECRET_KEY=$(openssl rand -base64 42)
+
 RESEND_API_KEY=$(openssl rand -base64 42)
+
 CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
 
 kubectl create namespace dify
