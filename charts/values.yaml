@@ -382,6 +382,53 @@ externalAzureBlobStorage:
   key: "difyai"
   container: "difyai-container"
 
+externalS3:
+  # Amazon Simple Storage Service
+  enabled: false
+  endpoint: "https://xxx.r2.cloudflarestorage.com"
+  accessKey: "ak-difyai"
+  secretKey: "sk-difyai"
+  useSSL: false
+  bucketName: "difyai"
+  rootPath: ""
+  useIAM: false
+  iamEndpoint: ""
+
+externalOSS:
+  # Alibaba Cloud Object Storage Service
+  enabled: false
+  endpoint: "https://oss-ap-southeast-1-internal.aliyuncs.com"
+  accessKey: "ak-difyai"
+  secretKey: "sk-difyai"
+  region: "ap-southeast-1"
+  bucketName: "difyai"
+  authVersion: v4
+
+externalWeaviate:
+  # External Weaviate Configuration
+  enabled: false
+  endpoint: "http://weaviate:8080"
+  apiKey: "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih"
+
+externalQdrant:
+  # External Qdrant Configuration
+  enabled: false
+  endpoint: "https://your-qdrant-cluster-url.qdrant.tech/"
+  apiKey: "ak-difyai"
+  timeout: 20
+  grpc:
+    enabled: false
+    port: 6334
+
+externalMilvus:
+  # External Milvus Configuration
+  enabled: false
+  host: "your-milvus.domain"
+  port: 19530
+  user: "user"
+  password: "Milvus"
+  useTLS: false
+
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
