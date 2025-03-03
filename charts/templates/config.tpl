@@ -28,6 +28,9 @@ FILES_URL: {{ .Values.api.url.files | quote }}
 # When enabled, migrations will be executed prior to application startup and the application will start after the migrations have completed.
 MIGRATION_ENABLED: {{ .Values.api.migration | toString | quote }}
 
+# The Marketplace API URL
+MARKETPLACE_API_URL: {{ .Values.api.url.marketplace | quote }}
+
 # The configurations of postgres database connection.
 # It is consistent with the configuration in the 'db' service below.
 {{- include "dify.db.config" . }}
@@ -84,6 +87,9 @@ PLUGIN_DAEMON_URL: http://{{ template "dify.pluginDaemon.fullname" .}}:{{ .Value
 # Startup mode, 'worker' starts the Celery worker for processing the queue.
 MODE: worker
 
+# The URL of Marketplace API server.
+MARKETPLACE_API_URL: {{ .Values.worker.marketplace | quote }}
+
 # The base URL of console application web frontend, refers to the Console base URL of WEB service if console domain is
 # different from api or web app domain.
 # example: http://cloud.dify.ai
@@ -123,6 +129,10 @@ CONSOLE_API_URL: {{ .Values.api.url.consoleApi | quote }}
 # example: http://udify.app
 APP_API_URL: {{ .Values.api.url.appApi | quote }}
 # The DSN for Sentry
+# The Marketplace URL
+MARKETPLACE_URL: {{ .Values.web.marketplace.url | quote }}
+# The Marketplace API URL
+MARKETPLACE_API_URL: {{ .Values.web.marketplace.api.url | quote }}
 {{- end }}
 
 {{- define "dify.db.config" -}}

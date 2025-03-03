@@ -119,6 +119,8 @@ api:
     # or download URL to the front-end or as a multi-modal model input;
     # In order to prevent others from forging, the image preview URL is signed and has a 5-minute expiration time.
     files: ""
+    # The URL of Marketplace API, used to display the Marketplace API Base Url to the front-end.
+    marketplace: "https://marketplace.dify.ai"
   mail:
     # default email sender from email address, if not not given specific address
     defaultSender: 'YOUR EMAIL FROM (eg: no-reply <no-reply@dify.ai>)'
@@ -186,6 +188,7 @@ worker:
   #        name: my-secret
   #        key: DB_PASSWORD
   logLevel: INFO
+  marketplace: "https://marketplace.dify.ai"
 
 
 # Dify Proxy Configuration
@@ -246,6 +249,10 @@ web:
     annotations: {}
     labels: {}
     clusterIP: ""
+  marketplace:
+    url: "https://marketplace.dify.ai"
+    api:
+      url: "https://marketplace.dify.ai"
 
 # Dify Sandbox Configuration
 sandbox:
