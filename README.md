@@ -1,3 +1,7 @@
+<img width="1074" alt="Xnip2025-03-03_21-32-36" src="https://github.com/user-attachments/assets/0a30a93e-f130-4171-b163-541e6c885cd3" />
+
+
+
 ```
 # Generate Keys
 API_SECRET_KEY=$(openssl rand -base64 42)
