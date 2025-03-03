@@ -507,7 +507,7 @@ cache_store_log none
 DB_DATABASE: {{ .Values.pluginDaemon.database | quote }}
 {{- end }}
 SERVER_PORT: "5002"
-DIFY_INNER_API_URL: {{ .Values.pluginDaemon.apiUrl | quote }}
+DIFY_INNER_API_URL: http://{{ template "dify.fullname" . }}-api:5001
 MAX_PLUGIN_PACKAGE_SIZE: "52428800"
 PLUGIN_WORKING_PATH: {{ .Values.pluginDaemon.persistence.mountPath | quote }}
 PLUGIN_REMOTE_INSTALLING_HOST: {{ .Values.pluginDaemon.remote.host | quote }}
