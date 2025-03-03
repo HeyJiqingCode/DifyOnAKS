@@ -140,4 +140,5 @@ API_KEY: {{ .Values.sandbox.auth.apiKey | b64enc | quote }}
 {{ include "dify.db.credentials" . }}
 {{ include "dify.redis.credentials" . }}
 SERVER_KEY: {{ .Values.pluginDaemon.auth.apiKey | b64enc | quote }}
+DIFY_INNER_API_KEY: {{ .Values.pluginDaemon.auth.innerApiKey | b64enc | quote }}
 {{- end }}

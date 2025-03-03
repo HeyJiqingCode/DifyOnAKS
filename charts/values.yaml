@@ -344,6 +344,7 @@ pluginDaemon:
     clusterIP: ""
   auth:
     apiKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
+    innerApiKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
   database: "dify_plugin"
   apiUrl: "http://api:5001"
   persistence:
