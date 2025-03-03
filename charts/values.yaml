@@ -346,10 +346,10 @@ pluginDaemon:
     apiKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
     innerApiKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
   database: "dify_plugin"
-  apiUrl: "http://api:5001"
+  apiUrl: ""
   remote:
-    port: 443
-    host: https://marketplace.dify.ai
+    port: 5003
+    host: 0.0.0.0
   persistence:
     mountPath: "/app/storage/cwd"
     annotations:
