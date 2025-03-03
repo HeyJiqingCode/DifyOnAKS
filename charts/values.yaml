@@ -348,7 +348,6 @@ pluginDaemon:
   database: "dify_plugin"
   apiUrl: "http://api:5001"
   remote:
-    port: 443
     host: https://plugins.dify.ai
   persistence:
     mountPath: "/app/storage/cwd"
