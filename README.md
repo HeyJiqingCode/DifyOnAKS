@@ -3,6 +3,7 @@
 API_SECRET_KEY=$(openssl rand -base64 42)
 RESEND_API_KEY=$(openssl rand -base64 42)
 CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
+INNER_API_KEY=$(openssl rand -base64 42)
 ```
 
 ```
@@ -21,6 +22,8 @@ helm install demo ./DifyOnAKS/charts/ \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
+--set pluginDaemon.auth.apiKey=$DAEMON_API_KEY \
+--set pluginDaemon.auth.innerApiKey=$INNER_API_KEY \
 --set ingress.className='azure-application-gateway' \
 --set ingress.tls[0].hosts[0]='<domain_name>' \
 --set ingress.tls[0].secretName=certs-dify \
@@ -36,10 +39,5 @@ helm install demo ./DifyOnAKS/charts/ \
 --set externalPgvector.username=postgres \
 --set externalPgvector.password='<pg_password>' \
 --set externalPgvector.address='<pg_host>' \
---set externalPgvector.dbName=dify \
---set externalAzureBlobStorage.enabled=true \
---set externalAzureBlobStorage.url='https://<storage_account_name>.blob.core.windows.net' \
---set externalAzureBlobStorage.account='<storage_account_name>' \
---set externalAzureBlobStorage.key='<access_key>' \
---set externalAzureBlobStorage.container=dify 
+--set externalPgvector.dbName=dify
 ```
