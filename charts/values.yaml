@@ -482,6 +482,21 @@ externalOSS:
   bucketName: "difyai"
   authVersion: v4
 
+externalGCS:
+  # Google Cloud Storage
+  enabled: false
+  bucketName: "difyai"
+  serviceAccountJsonBase64: ""
+
+externalCOS:
+  # Tencent COS
+  enabled: false
+  secretKey: "your-secret-key"
+  secretId: "your-secret-id"
+  region: "your-region"
+  bucketName: "your-bucket-name"
+  scheme: "your-scheme"
+
 externalWeaviate:
   # External Weaviate Configuration
   enabled: false
