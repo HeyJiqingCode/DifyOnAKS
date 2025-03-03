@@ -1,23 +1,36 @@
+
+## Architecture
 <img width="1074" alt="Xnip2025-03-03_21-32-36" src="https://github.com/user-attachments/assets/0a30a93e-f130-4171-b163-541e6c885cd3" />
 
 
+## Step-by-Step
 
+1) Create Application Gateway (backend pool without targets) ;
+2) Create AKS cluster with ingress-appgw addons enabled ;
+3) Create Azure Cache for Redis 
+    - Enable access keys authentication and non-ssl ;
+    - Disable public access and create private endpoint ;
+4) Create Azure Database for PostgreSQL / Azure Cosmos DB for PostgreSQL
+    - Install extension vector and uuid-ossp ;
+    - Disable public access and create private endpoint ;
+5) Create Azure Storage Account / Container and disable public access and create private endpoint 
+
+6) Generate Keys
 ```
-# Generate Keys
 API_SECRET_KEY=$(openssl rand -base64 42)
 RESEND_API_KEY=$(openssl rand -base64 42)
 CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
 INNER_API_KEY=$(openssl rand -base64 42)
 ```
 
+7) Create Namespace&Secret
 ```
-# Create Namespace&Secret
 kubectl create namespace dify
 kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key 
 ```
 
+8) Helm Install Dify
 ```
-# Helm Install Dify
 helm install demo ./DifyOnAKS/charts/ \
 --set nodeSelector.agentpool=dify \
 --set image.api.tag=latest \
