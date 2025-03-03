@@ -72,6 +72,10 @@ CODE_EXECUTION_ENDPOINT: http://{{ template "dify.sandbox.fullname" .}}:{{ .Valu
 SSRF_PROXY_HTTP_URL: http://{{ template "dify.ssrfProxy.fullname" .}}:{{ .Values.ssrfProxy.service.port }}
 SSRF_PROXY_HTTPS_URL: http://{{ template "dify.ssrfProxy.fullname" .}}:{{ .Values.ssrfProxy.service.port }}
 {{- end }}
+
+{{- if .Values.pluginDaemon.enabled }}
+PLUGIN_DAEMON_URL: http://{{ template "dify.pluginDaemon.fullname" .}}:{{ .Values.pluginDaemon.service.port }}
+{{- end }}
 {{- end }}
 
 {{- define "dify.worker.config" -}}
@@ -104,6 +108,9 @@ LOG_LEVEL: {{ .Values.worker.logLevel | quote }}
 # The Vector store configurations.
 {{ include "dify.vectordb.config" . }}
 {{ include "dify.mail.config" . }}
+{{- if .Values.pluginDaemon.enabled }}
+PLUGIN_DAEMON_URL: http://{{ template "dify.pluginDaemon.fullname" .}}:{{ .Values.pluginDaemon.service.port }}
+{{- end }}
 {{- end }}
 
 {{- define "dify.web.config" -}}
@@ -147,16 +154,16 @@ DB_DATABASE: {{ .Values.postgresql.global.postgresql.auth.database }}
 
 {{- define "dify.storage.config" -}}
 {{- if .Values.externalS3.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob` and `aliyun-oss`, Default: `local`
+# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
 STORAGE_TYPE: s3
 # The S3 storage configurations, only available when STORAGE_TYPE is `s3`.
 S3_ENDPOINT: {{ .Values.externalS3.endpoint }}
 S3_BUCKET_NAME: {{ .Values.externalS3.bucketName }}
 # S3_ACCESS_KEY: {{ .Values.externalS3.accessKey }}
 # S3_SECRET_KEY: {{ .Values.externalS3.secretKey }}
-S3_REGION: 'us-east-1'
+S3_REGION: {{ .Values.externalS3.region }}
 {{- else if .Values.externalAzureBlobStorage.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob` and `aliyun-oss`, Default: `local`
+# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
 STORAGE_TYPE: azure-blob
 # The Azure Blob storage configurations, only available when STORAGE_TYPE is `azure-blob`.
 AZURE_BLOB_ACCOUNT_NAME: {{ .Values.externalAzureBlobStorage.account | quote }}
@@ -164,7 +171,7 @@ AZURE_BLOB_ACCOUNT_NAME: {{ .Values.externalAzureBlobStorage.account | quote }}
 AZURE_BLOB_CONTAINER_NAME: {{ .Values.externalAzureBlobStorage.container | quote }}
 AZURE_BLOB_ACCOUNT_URL: {{ .Values.externalAzureBlobStorage.url | quote }}
 {{- else if .Values.externalOSS.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob` and `aliyun-oss`, Default: `local`
+# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
 STORAGE_TYPE: aliyun-oss
 # The OSS storage configurations, only available when STORAGE_TYPE is `aliyun-oss`.
 ALIYUN_OSS_ENDPOINT: {{ .Values.externalOSS.endpoint }}
@@ -173,6 +180,24 @@ ALIYUN_OSS_BUCKET_NAME: {{ .Values.externalOSS.bucketName }}
 # ALIYUN_OSS_SECRET_KEY: {{ .Values.externalOSS.secretKey }}
 ALIYUN_OSS_REGION: {{ .Values.externalOSS.region }}
 ALIYUN_OSS_AUTH_VERSION: {{ .Values.externalOSS.authVersion }}
+{{- else if .Values.externalGCS.enabled }}
+# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
+STORAGE_TYPE: google-storage
+GOOGLE_STORAGE_BUCKET_NAME: {{ .Values.externalGCS.bucketName }}
+GOOGLE_STORAGE_SERVICE_ACCOUNT_JSON_BASE64: {{ .Values.externalGCS.serviceAccountJsonBase64 }}
+{{- else if .Values.externalCOS.enabled }}
+# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss`, `google-storage` and `tencent-cos`, Default: `local`
+STORAGE_TYPE: tencent-cos
+# The name of the Tencent COS bucket to use for storing files.
+TENCENT_COS_BUCKET_NAME: {{ .Values.externalCOS.bucketName }}
+# The secret key to use for authenticating with the Tencent COS service.
+TENCENT_COS_SECRET_KEY: {{ .Values.externalCOS.secretKey }}
+# The secret id to use for authenticating with the Tencent COS service.
+TENCENT_COS_SECRET_ID: {{ .Values.externalCOS.secretId }}
+# The region of the Tencent COS service.
+TENCENT_COS_REGION: {{ .Values.externalCOS.region }}
+# The scheme of the Tencent COS service.
+TENCENT_COS_SCHEME: {{ .Values.externalCOS.scheme }}
 {{- else }}
 # The type of storage to use for storing user files. Supported values are `local` and `s3` and `azure-blob`, Default: `local`
 STORAGE_TYPE: local
@@ -249,6 +274,8 @@ VECTOR_STORE: milvus
 MILVUS_HOST: {{ .Values.externalMilvus.host | quote }}
 # The milvus host.
 MILVUS_PORT: {{ .Values.externalMilvus.port | toString | quote }}
+# The milvus database
+MILVUS_DATABASE: {{ .Values.externalMilvus.database | quote }}
 # The milvus username.
 # MILVUS_USER: {{ .Values.externalMilvus.user | quote }}
 # The milvus password.
@@ -263,6 +290,16 @@ PGVECTOR_PORT: {{ .Values.externalPgvector.port | toString | quote }}
 PGVECTOR_DATABASE: {{ .Values.externalPgvector.dbName }}
 # DB_USERNAME: {{ .Values.externalPgvector.username }}
 # DB_PASSWORD: {{ .Values.externalPgvector.password }}
+{{- else if .Values.externalTencentVectorDB.enabled}}
+# tencent vector configurations, only available when VECTOR_STORE is `tencent`
+VECTOR_STORE: tencent
+TENCENT_VECTOR_DB_URL: {{ .Values.externalTencentVectorDB.url | quote }}
+TENCENT_VECTOR_DB_API_KEY: {{ .Values.externalTencentVectorDB.apiKey | quote }}
+TENCENT_VECTOR_DB_TIMEOUT: {{ .Values.externalTencentVectorDB.timeout | quote }}
+TENCENT_VECTOR_DB_USERNAME: {{ .Values.externalTencentVectorDB.username | quote }}
+TENCENT_VECTOR_DB_DATABASE: {{ .Values.externalTencentVectorDB.database | quote }}
+TENCENT_VECTOR_DB_SHARD: {{ .Values.externalTencentVectorDB.shard | quote }}
+TENCENT_VECTOR_DB_REPLICAS: {{ .Values.externalTencentVectorDB.replicas | quote }}
 {{- else if .Values.weaviate.enabled }}
 # The type of vector store to use. Supported values are `weaviate`, `qdrant`, `milvus`.
 VECTOR_STORE: weaviate
@@ -355,7 +392,7 @@ http {
     keepalive_timeout  65;
 
     #gzip  on;
-    client_max_body_size 15M;
+    client_max_body_size {{ .Values.proxy.clientMaxBodySize | default "15m" }};
 
     include /etc/nginx/conf.d/*.conf;
 }
@@ -383,6 +420,17 @@ server {
 
     location /files {
       proxy_pass http://{{ template "dify.api.fullname" .}}:{{ .Values.api.service.port }};
+      include proxy.conf;
+    }
+
+    location /explore {
+      proxy_pass http://{{ template "dify.web.fullname" .}}:{{ .Values.web.service.port }};
+      proxy_set_header Dify-Hook-Url $scheme://$host$request_uri;
+      include proxy.conf;
+    }
+
+    location /e {
+      proxy_pass http://{{ template "dify.pluginDaemon.fullname" .}}:{{ .Values.pluginDaemon.service.port }};
       include proxy.conf;
     }
 
@@ -450,4 +498,15 @@ cache_log none
 access_log none
 cache_store_log none
 {{- end }}
+{{- end }}
+
+{{- define "dify.pluginDaemon.config" }}
+{{- include "dify.redis.config" . }}
+{{- include "dify.db.config" .}}
+{{- if .Values.pluginDaemon.database }}
+DB_DATABASE: {{ .Values.pluginDaemon.database | quote }}
+{{- end }}
+SERVER_PORT: "5002"
+MAX_PLUGIN_PACKAGE_SIZE: "52428800"
+PLUGIN_WORKING_PATH: {{ .Values.pluginDaemon.persistence.mountPath | quote }}
 {{- end }}

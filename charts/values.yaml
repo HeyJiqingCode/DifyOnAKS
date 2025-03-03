@@ -42,6 +42,17 @@ image:
     # pullSecrets:
     #   - myRegistryKeySecretName
 
+  pluginDaemon:
+    repository: langgenius/dify-plugin-daemon
+    tag: 0.0.3-local
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ##
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+
 
 # Dify API Configuration
 api:
@@ -300,6 +311,73 @@ ssrfProxy:
     annotations: {}
     labels: {}
     clusterIP: ""
+
+
+# Dify Plugin Daemon Configuration
+pluginDaemon:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  ## Configure extra options for plugin daemon containers' liveness, readiness and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param pluginDaemon.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param pluginDaemon.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param pluginDaemon.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  service:
+    port: 5002
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  auth:
+    apiKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
+  database: "dify_plugin"
+  persistence:
+    mountPath: "/app/storage/cwd"
+    annotations:
+      helm.sh/resource-policy: keep
+    persistentVolumeClaim:
+      existingClaim: ""
+      ## Dify Plugin Daemon Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.
+      ## ReadWriteMany access mode required for `pluginDaemon`
+      ##
+      storageClass: azurefile-csi
+      accessModes: ReadWriteMany
+      size: 5Gi
+      subPath: ""
+  ## pluginDaemon ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param pluginDaemon.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param pluginDaemon.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param pluginDaemon.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param pluginDaemon.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
 
 
 # Self-hosted Services Configuration
