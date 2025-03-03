@@ -512,4 +512,11 @@ MAX_PLUGIN_PACKAGE_SIZE: "52428800"
 PLUGIN_WORKING_PATH: {{ .Values.pluginDaemon.persistence.mountPath | quote }}
 PLUGIN_REMOTE_INSTALLING_HOST: {{ .Values.pluginDaemon.remote.host | quote }}
 PLUGIN_REMOTE_INSTALLING_PORT: {{ .Values.pluginDaemon.remote.port | quote }}
+MARKETPLACE_API_URL: {{ .Values.pluginDaemon.marketplace.url | quote }}
+{{- end }}
+
+{{- define "dify.ssrfProxy.config" }}
+{{- include "dify.redis.config" . }}
+{{- include "dify.db.config" .}}
+{{- if .Values.ssrfProxy.database }}
 {{- end }}
