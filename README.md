@@ -4,11 +4,10 @@ Deploy langgenius/dify on AKS(Azure Kubernetes Services) with helm chart.
 ## Default Values
 <table>
     <tr>
-        <td style="font-weight:bold" colspan="3">Items</td>
+        <td style="font-weight:bold" colspan="2">Items</td>
         <td style="font-weight:bold">Default Values</td>
     </tr>
     <tr>
-        <td rowspan="9">Dify Components</td>
         <td rowspan="2">api</td>
         <td>enabled</td>
         <td>true</td>
@@ -51,7 +50,6 @@ Deploy langgenius/dify on AKS(Azure Kubernetes Services) with helm chart.
         <td>azurefile-csi</td>
     </tr>
     <tr>
-        <td rowspan="3">Self-Host DB&Cache</td>
         <td>postgresql</td>
         <td>enabled</td>
         <td>false</td>
@@ -67,7 +65,6 @@ Deploy langgenius/dify on AKS(Azure Kubernetes Services) with helm chart.
         <td>false</td>
     </tr>
     <tr>
-        <td rowspan="5">Azure Services</td>
         <td>externalPostgres</td>
         <td>enabled</td>
         <td>true</td>
