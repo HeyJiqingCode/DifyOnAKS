@@ -2,25 +2,96 @@
 Deploy langgenius/dify on AKS(Azure Kubernetes Services) with helm chart.
 
 ## Default Values
-|Parameters|Default Values|
-|-|-|
-|api.enabled|true|
-|api.persistence.persistentVolumeClaim.storageClass|azurefile-csi|
-|worker.enabled|true|
-|proxy.enabled|trye|
-|web.enabled|true|
-|sandbox.enabled|trye|
-|pluginDaemon.enabled|true|
-|pluginDaemon.persistence.persistentVolumeClaim.storageClass|azurefile-csi|
-|postgresql.enabled|false|
-|redis.enabled|false|
-|weaviate.enabled|false|
-|ingress.enabled|true|
-|ingress.className|azure-application-gateway|
-|externalPostgres.enabled|true|
-|externalPgvector.enabled|true|
-|externalRedis.enabled|true|
-
+<table>
+    <tr>
+        <td style="font-weight:bold" colspan="3">Items</td>
+        <td style="font-weight:bold">Default Values</td>
+    </tr>
+    <tr>
+        <td rowspan="9">Dify Components</td>
+        <td rowspan="2">api</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>persistence.persistentVolumeClaim.storageClass</td>
+        <td>azurefile-csi</td>
+    </tr>
+    <tr>
+        <td>worker</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td rowspan="2">proxy</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>log.persistence.enabled</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td>web</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>sandbox</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td rowspan="2">pluginDaemon</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>persistence.persistentVolumeClaim.storageClass</td>
+        <td>azurefile-csi</td>
+    </tr>
+    <tr>
+        <td rowspan="3">Self-Host DB&Cache</td>
+        <td>postgresql</td>
+        <td>enabled</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td>redis</td>
+        <td>enabled</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td>weaviate</td>
+        <td>enabled</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td rowspan="5">Azure Services</td>
+        <td>externalPostgres</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>externalPgvector</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>externalRedis</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td rowspan="2">ingress</td>
+        <td>enabled</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td>className</td>
+        <td>azure-application-gateway</td>
+    </tr>
+</table>
 
 ## Architecture
 <img width="1074" alt="Xnip2025-03-03_21-32-36" src="https://github.com/user-attachments/assets/0a30a93e-f130-4171-b163-541e6c885cd3" />
