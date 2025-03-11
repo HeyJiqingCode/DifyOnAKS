@@ -1,5 +1,5 @@
 ## DifyOnAKS
-Deploy langgenius/dify on AKS(Azure Kubernetes Services) with helm chart.
+Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubernetes Services) with helm chart.
 
 ## Default Values
 <table>
