@@ -2,7 +2,24 @@
 Deploy langgenius/dify on AKS(Azure Kubernetes Services) with helm chart.
 
 ## Default Values
-
+|Parameters|Default Values|
+|-|-|
+|api.enabled|true|
+|api.persistence.persistentVolumeClaim.storageClass|azurefile-csi|
+|worker.enabled|true|
+|proxy.enabled|trye|
+|web.enabled|true|
+|sandbox.enabled|trye|
+|pluginDaemon.enabled|true|
+|pluginDaemon.persistence.persistentVolumeClaim.storageClass|azurefile-csi|
+|postgresql.enabled|false|
+|redis.enabled|false|
+|weaviate.enabled|false|
+|ingress.enabled|true|
+|ingress.className|azure-application-gateway|
+|externalPostgres.enabled|true|
+|externalPgvector.enabled|true|
+|externalRedis.enabled|true|
 
 
 ## Architecture
