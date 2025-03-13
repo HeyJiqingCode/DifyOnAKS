@@ -91,6 +91,12 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
 </table>
 
 ## Architecture
+
+1）Dify components running with Docker Compose, and the Azure service used to host them.
+<img width="981" alt="image" src="https://github.com/user-attachments/assets/e439e50b-61ba-49b9-bc36-dea5d5db874e" />
+
+
+2）From the perspective of Azure Service, the deployment architecture of Dify is as follows:
 <img width="988" alt="image" src="https://github.com/user-attachments/assets/27e1f416-d3e7-496f-92c0-0c5a9816e852" />
 
 
