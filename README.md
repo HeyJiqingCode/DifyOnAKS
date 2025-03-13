@@ -91,7 +91,8 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
 </table>
 
 ## Architecture
-<img width="1074" alt="Xnip2025-03-03_21-32-36" src="https://github.com/user-attachments/assets/0a30a93e-f130-4171-b163-541e6c885cd3" />
+<img width="988" alt="image" src="https://github.com/user-attachments/assets/27e1f416-d3e7-496f-92c0-0c5a9816e852" />
+
 
 
 ## Step-by-Step
