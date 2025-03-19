@@ -130,7 +130,7 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set image.api.tag=1.0.0 \
 --set image.web.tag=1.0.0 \
 --set image.sandbox.tag=0.2.10 \
---set image.pluginDaemon.tag=0.0.3-local \
+--set image.pluginDaemon.tag=0.0.4-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \

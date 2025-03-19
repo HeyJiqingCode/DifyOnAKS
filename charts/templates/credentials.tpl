@@ -13,10 +13,6 @@ CODE_EXECUTION_API_KEY: {{ .Values.sandbox.auth.apiKey | b64enc | quote }}
 {{ include "dify.storage.credentials" . }}
 {{ include "dify.vectordb.credentials" . }}
 {{ include "dify.mail.credentials" . }}
-{{- if .Values.pluginDaemon.enabled }}
-PLUGIN_DAEMON_KEY: {{ .Values.pluginDaemon.auth.serverKey | b64enc | quote }}
-INNER_API_KEY_FOR_PLUGIN: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quote }}
-{{- end }}
 {{- end }}
 
 {{- define "dify.worker.credentials" -}}
@@ -34,10 +30,6 @@ SECRET_KEY: {{ .Values.api.secretKey | b64enc | quote }}
 # The Vector store configurations.
 {{ include "dify.vectordb.credentials" . }}
 {{ include "dify.mail.credentials" . }}
-{{- if .Values.pluginDaemon.enabled }}
-PLUGIN_DAEMON_KEY: {{ .Values.pluginDaemon.auth.serverKey | b64enc | quote }}
-INNER_API_KEY_FOR_PLUGIN: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quote }}
-{{- end }}
 {{- end }}
 
 {{- define "dify.web.credentials" -}}
@@ -116,12 +108,6 @@ MILVUS_PASSWORD: {{ .Values.externalMilvus.password | b64enc | quote }}
 PGVECTOR_USER: {{ .Values.externalPgvector.username | b64enc | quote }}
 # The pgvector password.
 PGVECTOR_PASSWORD: {{ .Values.externalPgvector.password | b64enc | quote }}
-{{- else if .Values.externalTencentVectorDB.enabled}}
-TENCENT_VECTOR_DB_USERNAME: {{ .Values.externalTencentVectorDB.username | b64enc | quote }}
-TENCENT_VECTOR_DB_API_KEY: {{ .Values.externalTencentVectorDB.apiKey | b64enc | quote }}
-{{- else if .Values.externalMyScaleDB.enabled}}
-MYSCALE_USER: {{ .Values.externalMyScaleDB.username | b64enc | quote }}
-MYSCALE_PASSWORD: {{ .Values.externalMyScaleDB.password | b64enc | quote }}
 {{- else if .Values.weaviate.enabled }}
 # The Weaviate API key.
   {{- if .Values.weaviate.authentication.apikey }}
@@ -142,11 +128,4 @@ SMTP_PASSWORD: {{ .Values.api.mail.smtp.password | b64enc | quote }}
 
 {{- define "dify.sandbox.credentials" -}}
 API_KEY: {{ .Values.sandbox.auth.apiKey | b64enc | quote }}
-{{- end }}
-
-{{- define "dify.pluginDaemon.credentials" -}}
-{{ include "dify.db.credentials" . }}
-{{ include "dify.redis.credentials" . }}
-SERVER_KEY: {{ .Values.pluginDaemon.auth.serverKey | b64enc | quote }}
-DIFY_INNER_API_KEY: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quote }}
 {{- end }}

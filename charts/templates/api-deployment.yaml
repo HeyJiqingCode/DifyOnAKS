@@ -1,5 +1,5 @@
 {{- if and .Values.api.enabled}}
-{{- $usePvc := not (or .Values.externalS3.enabled .Values.externalOSS.enabled .Values.externalAzureBlobStorage.enabled .Values.externalGCS.enabled .Values.externalCOS.enabled .Values.externalOBS.enabled) -}}
+{{- $usePvc := not (or .Values.externalS3.enabled .Values.externalOSS.enabled .Values.externalAzureBlobStorage.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,8 +26,6 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/api-config: {{ include (print $.Template.BasePath "/api-config.yaml") . | sha256sum }}
-        checksum/api-secret: {{ include (print $.Template.BasePath "/api-secret.yaml") . | sha256sum }}
 {{ include "dify.ud.annotations" . | indent 8 }}
       labels:
 {{- include "dify.selectorLabels" . | nindent 8 }}
@@ -39,7 +37,6 @@ spec:
         */}}
 {{ include "dify.ud.labels" . | indent 8 }}
     spec:
-      serviceAccountName: {{ include "dify.api.serviceAccountName" . }}
       {{- if eq .Release.Name "dify"}}
       {{/*
       Disable service environment variables,
@@ -53,41 +50,10 @@ spec:
         - name: {{ . }}
       {{- end }}
       {{- end }}
-      {{- if .Values.api.podSecurityContext }}
-      securityContext:
-{{ toYaml .Values.api.podSecurityContext | indent 8 }}
-      {{- end }}
       containers:
-      - image: "{{ .Values.image.api.repository }}:{{ default .Chart.AppVersion .Values.image.api.tag }}"
+      - image: "{{ .Values.image.api.repository }}:{{ .Values.image.api.tag }}"
         imagePullPolicy: "{{ .Values.image.api.pullPolicy }}"
         name: api
-        {{- if .Values.api.customLivenessProbe }}
-        livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.api.customLivenessProbe "context" $) | nindent 10 }}
-        {{- else if .Values.api.livenessProbe.enabled }}
-        livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.api.livenessProbe "enabled") "context" $) | nindent 10 }}
-          httpGet:
-            path: /health
-            port: api
-        {{- end }}
-        {{- if .Values.api.customReadinessProbe }}
-        readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.api.customReadinessProbe "context" $) | nindent 10 }}
-        {{- else if .Values.api.readinessProbe.enabled }}
-        readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.api.readinessProbe "enabled") "context" $) | nindent 10 }}
-          httpGet:
-            path: /health
-            port: api
-        {{- end }}
-        {{- if .Values.api.customStartupProbe }}
-        startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.api.customStartupProbe "context" $) | nindent 10 }}
-        {{- else if .Values.api.startupProbe.enabled }}
-        startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.api.startupProbe "enabled") "context" $) | nindent 10 }}
-          tcpSocket:
-            port: api
-        {{- end }}
-        {{- if .Values.api.containerSecurityContext }}
-        securityContext:
-{{ toYaml .Values.api.containerSecurityContext | indent 10 }}
-        {{- end }}
         env:
         {{- if .Values.sandbox.enabled }}
         - name: CODE_EXECUTION_API_KEY
