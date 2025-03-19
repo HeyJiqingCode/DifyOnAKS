@@ -93,10 +93,11 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
 ## Architecture
 
 1）Dify components running with docker-compose, and the azure services used to host them.
-<img width="1060" alt="image" src="https://github.com/user-attachments/assets/3d0a7437-7edb-4f3f-91ab-bcb019d06a2f" />
+![image](https://github.com/user-attachments/assets/84a3edd0-6475-4c34-918a-79a72d605a68)
+
 
 2）From the perspective of azure service, the deployment architecture of dify.
-<img width="988" alt="image" src="https://github.com/user-attachments/assets/27e1f416-d3e7-496f-92c0-0c5a9816e852" />
+![image](https://github.com/user-attachments/assets/c5e28365-54f1-46f3-ad65-8f7c9bc1bf11)
 
 ## Step-by-Step
 
@@ -130,7 +131,7 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set image.api.tag=1.0.0 \
 --set image.web.tag=1.0.0 \
 --set image.sandbox.tag=0.2.10 \
---set image.pluginDaemon.tag=0.0.3-local \
+--set image.pluginDaemon.tag=0.0.4-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
