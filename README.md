@@ -115,6 +115,7 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
 ```
 API_SECRET_KEY=$(openssl rand -base64 42)
 RESEND_API_KEY=$(openssl rand -base64 42)
+CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
 DAEMON_SERVER_KEY=$(openssl rand -base64 42)
 INNER_DIFY_KEY=$(openssl rand -base64 42)
 ```
