@@ -1,0 +1,841 @@
+# Image configuration
+image:
+  api:
+    repository: langgenius/dify-api
+    tag: "1.1.0"
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  web:    
+    repository: langgenius/dify-web
+    tag: "1.1.0"
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  sandbox:
+    repository: langgenius/dify-sandbox
+    tag: "0.2.10"
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  proxy:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+
+  ssrfProxy:
+    repository: ubuntu/squid
+    tag: latest
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+
+  pluginDaemon:
+    repository: langgenius/dify-plugin-daemon
+    tag: 0.0.5-local
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+
+
+# Dify API Configuration
+api:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+  ## Configure extra options for API containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param api.livenessProbe.enabled Enable livenessProbe on API nodes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+  ## @param api.readinessProbe.enabled Enable readinessProbe on API nodes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+  ## @param api.startupProbe.enabled Enable startupProbe on API containers
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+  ## @param api.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param api.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param api.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary.
+  # Variables defined here take higher priority than those from `ConfigMap` generated given `.Values`
+  # The direct approach
+  # - name: LANG
+  #   value: "C.UTF-8"
+  #   - name: SECRET_KEY
+  # Use existing k8s secrets
+  #  - name: DB_PASSWORD
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: my-secret
+  #        key: DB_PASSWORD
+  - name: CHECK_UPDATE_URL
+    # Won't check for updates if left empty
+    #   value: https://updates.dify.ai
+    value: ""
+  - name: CODE_MAX_NUMBER
+    value: "9223372036854775807"
+  - name: CODE_MIN_NUMBER
+    value: "-9223372036854775808"
+  - name: CODE_MAX_STRING_LENGTH
+    value: "80000"
+  - name: TEMPLATE_TRANSFORM_MAX_LENGTH
+    value: "80000"
+  - name: CODE_MAX_STRING_ARRAY_LENGTH
+    value: "30"
+  - name: CODE_MAX_OBJECT_ARRAY_LENGTH
+    value: "30"
+  - name: CODE_MAX_NUMBER_ARRAY_LENGTH
+    value: "1000"
+  service:
+    port: 5001
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+  logLevel: INFO
+  url:
+    # The backend URL of the console API, used to concatenate the authorization callback.
+    # If empty, it is the same domain. Example: https://api.console.dify.ai
+    consoleApi: ""
+    # The front-end URL of the console web, used to concatenate some front-end addresses and for CORS configuration use.
+    # If empty, it is the same domain. Example: https://console.dify.ai
+    consoleWeb: ""
+    # Service API URL, used to display Service API Base URL to the front-end.
+    # If empty, it is the same domain. Example: https://api.dify.ai
+    serviceApi: ""
+    # WebApp API backend URL, used to declare the back-end URL for the front-end API.
+    # If empty, it is the same domain. Example: https://app.dify.ai
+    appApi: ""
+    # WebApp URL, used to display WebAPP API Base URL to the front-end. If empty, it is the same domain. Example: https://api.app.dify.ai
+    appWeb: ""
+    # File preview or download URL prefix, used to display the file preview
+    # or download URL to the front-end or as a multi-modal model input;
+    # In order to prevent others from forging, the image preview URL is signed and has a 5-minute expiration time.
+    files: ""
+    marketplaceApi: "https://marketplace.dify.ai"
+    marketplace: "https://marketplace.dify.ai"
+  mail:
+    # default email sender from email address, if not given a specific address
+    defaultSender: "YOUR EMAIL FROM (e.g.: no-reply <no-reply@dify.ai>)"
+    # Mail type, supported values are `smtp`, `resend` https://docs.dify.ai/getting-started/install-self-hosted/environments#mail-related-configuration
+    type: "resend"
+    resend:
+      # Resend API Key
+      apiKey: "xxxx"
+      # Resend API URL
+      apiUrl: https://api.resend.com
+    # SMTP Configuration
+    smtp:
+      server: "smtp.server.com"
+      port: 465
+      username: "YOUR EMAIL"
+      password: "YOUR EMAIL PASSWORD"
+      tls:
+        enabled: true
+        optimistic: false
+  # When enabled, migrations will be executed prior to application startup and the application will start after the migrations have completed.
+  migration: true
+  # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
+  secretKey: "sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U"
+  ## Storage for `api` and `worker`
+  ## Ignored if `.Values.externalS3.enabled` is true
+  ##
+  persistence:
+    mountPath: "/app/api/storage"
+    annotations:
+      helm.sh/resource-policy: keep
+    persistentVolumeClaim:
+      existingClaim: ""
+      ## Dify App Data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.
+      ## ReadWriteMany access mode required for `api` and `worker`
+      ##
+      storageClass: azurefile-csi
+      accessModes: ReadWriteMany
+      size: 5Gi
+      subPath: ""
+  ## Dify API ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param api.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param api.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param api.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param api.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+
+
+# Dify Worker Configuration
+worker:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+  ## Configure extra options for worker containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param worker.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param worker.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param worker.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary.
+  # Variables defined here take higher priority than those from `ConfigMap` generated given `.Values`
+  # The direct approach
+  # - name: LANG
+  #   value: "C.UTF-8"
+  #   - name: SECRET_KEY
+  # Use existing k8s secrets
+  #  - name: DB_PASSWORD
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: my-secret
+  #        key: DB_PASSWORD
+  logLevel: INFO
+  ## Dify Worker ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param worker.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param worker.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param worker.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param worker.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+# Dify Proxy Configuration
+proxy:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  ## Configure extra options for proxy containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param proxy.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param proxy.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param proxy.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  ## @param proxy.clientMaxBodySize Custom client_max_body_size param nginx default: 15m
+  clientMaxBodySize: ""
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  log:
+    persistence:
+      ## If true, create/use a Persistent Volume Claim for log
+      ## If false, flush logs to stdout & stderr
+      ##
+      enabled: false
+      mountPath: "/var/log/nginx"
+      annotations:
+        helm.sh/resource-policy: keep
+      persistentVolumeClaim:
+        existingClaim: ""
+        ## Nginx Logs Persistent Volume Storage Class
+        ## If defined, storageClassName: <storageClass>
+        ## If set to "-", storageClassName: "", which disables dynamic provisioning
+        ## If undefined (the default) or set to null, no storageClassName spec is
+        ##   set, choosing the default provisioner.
+        ## ReadWriteMany access mode required for nginx
+        ##
+        storageClass: azurefile-csi
+        accessModes: ReadWriteMany
+        size: 1Gi
+        subPath: ""
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  ## Proxy ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param proxy.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param proxy.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param proxy.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param proxy.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+# Dify Portal Configuration
+web:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+  ## Configure extra options for web containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param web.livenessProbe.enabled Enable livenessProbe on web nodes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+  ## @param web.readinessProbe.enabled Enable readinessProbe on web nodes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+  ## @param web.startupProbe.enabled Enable startupProbe on web containers
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+  ## @param web.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param web.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param web.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  - name: EDITION
+    value: "SELF_HOSTED"
+  service:
+    port: 3000
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  ## Web ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param web.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param web.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param web.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param web.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+# Dify Sandbox Configuration
+sandbox:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+  ## Configure extra options for sandbox containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param sandbox.livenessProbe.enabled Enable livenessProbe on sandbox nodes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 1
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 2
+    successThreshold: 1
+  ## @param sandbox.readinessProbe.enabled Enable readinessProbe on sandbox nodes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 2
+    successThreshold: 1
+  ## @param sandbox.startupProbe.enabled Enable startupProbe on sandbox containers
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 2
+    successThreshold: 1
+  ## @param sandbox.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param sandbox.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param sandbox.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  - name: WORKER_TIMEOUT
+    value: "15"
+  service:
+    port: 8194
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  auth:
+    apiKey: "dify-sandbox"
+  privileged: false
+  ## Sandbox ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param sandbox.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param sandbox.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param sandbox.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param sandbox.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+# Dify SSRF Proxy Configuration
+ssrfProxy:
+  enabled: false
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  ## Configure extra options for ssrf proxy containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param ssrfProxy.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param ssrfProxy.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param ssrfProxy.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  log:
+    persistence:
+      ## If true, create/use a Persistent Volume Claim for log
+      ## If false, flush logs to stdout & stderr
+      ##
+      enabled: false
+      mountPath: "/var/log/squid"
+      annotations:
+        helm.sh/resource-policy: keep
+      persistentVolumeClaim:
+        existingClaim: ""
+        ## Squid Logs Persistent Volume Storage Class
+        ## If defined, storageClassName: <storageClass>
+        ## If set to "-", storageClassName: "", which disables dynamic provisioning
+        ## If undefined (the default) or set to null, no storageClassName spec is
+        ##   set, choosing the default provisioner.
+        ## ReadWriteMany access mode required for squid
+        ##
+        storageClass: azurefile-csi
+        accessModes: ReadWriteMany
+        size: 1Gi
+        subPath: ""
+  service:
+    port: 3128
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  ## ssrfProxy ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param ssrfProxy.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param ssrfProxy.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param ssrfProxy.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param ssrfProxy.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+# Dify Plugin Daemon Configuration
+pluginDaemon:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  ## Configure extra options for plugin daemon containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param pluginDaemon.customLivenessProbe Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  ## @param pluginDaemon.customReadinessProbe Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  ## @param pluginDaemon.customStartupProbe Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary
+  # - name: LANG
+  #   value: "C.UTF-8"
+  service:
+    ports:
+      daemon: 5002
+      # Leave it unspecified in order NOT to expose port for remote installation as a `Service`.
+      pluginInstall:
+      # pluginInstall: 5003
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+  auth:
+    serverKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
+    # A separate key for interactions between `api`(`worker`) and `pluginDaemon`
+    difyApiKey: "QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1"
+  persistence:
+    mountPath: "/app/storage"
+    annotations:
+      helm.sh/resource-policy: keep
+    persistentVolumeClaim:
+      existingClaim: ""
+      ## Dify Plugin Daemon Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.
+      ## ReadWriteMany access mode required for `pluginDaemon`
+      ##
+      storageClass: azurefile-csi
+      accessModes: ReadWriteMany
+      size: 5Gi
+      subPath: ""
+  marketplace:
+    enabled: true
+    # Takes effect only if built-in `nginx` were enabled
+    # If enabled, route marketplace api call to built-in `nginx` and strip headers for tracking.
+    # https://github.com/BorisPolonsky/dify-helm/pull/131
+    apiProxyEnabled: false
+  ## pluginDaemon ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param pluginDaemon.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param pluginDaemon.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param pluginDaemon.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param pluginDaemon.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
+# Self-hosted Services Configuration
+postgresql:
+  # PostgreSQL Configuration
+  enabled: false
+
+redis:
+  # Redis Configuration
+  enabled: false
+
+weaviate:
+  # Weaviate Configuration
+  enabled: false
+
+
+# Global Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: "azure-application-gateway"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    # nginx.ingress.kubernetes.io/proxy-body-size: 15m
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # - host: dify-example2.local
+    #   paths:
+    #     - path: /
+    #       pathType: Prefix
+  http:
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
+  hosts: []
+  tls: []
+
+
+# External Services Configuration
+externalPostgres:
+  # Azure Database for PostgresSQL
+  enabled: true
+  username: "postgres"
+  password: "difyai123456"
+  address: localhost
+  port: 5432
+  database:
+    api: "dify"
+    pluginDaemon: "dify_plugin"
+  maxOpenConns: 20
+  maxIdleConns: 5
+
+externalPgvector:
+  # Azure Database for PostgresSQL Vector Extensions
+  enabled: true
+  username: "postgres"
+  password: "difyai123456"
+  address: "pgvector"
+  port: 5432
+  dbName: dify
+
+externalRedis:
+  # Azure Cache for Redis
+  enabled: true
+  host: "redis.example"
+  port: 6379
+  username: ""
+  password: "difyai123456"
+  useSSL: false
+
+externalAzureBlobStorage:
+  # Azure Storage Account(Blob)
+  enabled: false
+  url: 'https://<your_account_name>.blob.core.windows.net'
+  account: "xxx"
+  key: "difyai"
+  container: "difyai-container"
+
+externalS3:
+  # Amazon Simple Storage Service
+  enabled: false
+  endpoint: "https://xxx.r2.cloudflarestorage.com"
+  accessKey: "ak-difyai"
+  secretKey: "sk-difyai"
+  useSSL: false
+  bucketName: "difyai"
+  rootPath: ""
+  useIAM: false
+  iamEndpoint: ""
+
+externalOSS:
+  # Alibaba Cloud Object Storage Service
+  enabled: false
+  endpoint: "https://oss-ap-southeast-1-internal.aliyuncs.com"
+  accessKey: "ak-difyai"
+  secretKey: "sk-difyai"
+  region: "ap-southeast-1"
+  bucketName: "difyai"
+  authVersion: v4
+
+externalGCS:
+  # Google Cloud Storage
+  enabled: false
+  bucketName: "difyai"
+  serviceAccountJsonBase64: ""
+
+externalCOS:
+  # Tencent COS
+  enabled: false
+  secretKey: "your-secret-key"
+  secretId: "your-secret-id"
+  region: "your-region"
+  bucketName: "your-bucket-name"
+  scheme: "your-scheme"
+
+externalOBS:
+  # Huawei OBS
+  enabled: false
+  secretKey: "your-secret-key"
+  secretId: "your-secret-id"
+  bucketName: "your-bucket-name"
+  server: "your-server"
+
+externalWeaviate:
+  # External Weaviate Configuration
+  enabled: false
+  endpoint: "http://weaviate:8080"
+  apiKey: "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih"
+
+externalQdrant:
+  # External Qdrant Configuration
+  enabled: false
+  endpoint: "https://your-qdrant-cluster-url.qdrant.tech/"
+  apiKey: "ak-difyai"
+  timeout: 20
+  grpc:
+    enabled: false
+    port: 6334
+
+externalMilvus:
+  # External Milvus Configuration
+  enabled: false
+  host: "your-milvus.domain"
+  port: 19530
+  user: "user"
+  password: "Milvus"
+  useTLS: false
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+
+# Global node selector
+# If set, this will apply to all dify components
+nodeSelector: {}
+
+
+# Global tolerations
+# If set, this will apply to all dify components
+tolerations: []
+
+
+# Global affinity
+# If set, this will apply to all dify components
+affinity: {}
