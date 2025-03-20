@@ -107,8 +107,7 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
 ```
 API_SECRET_KEY=$(openssl rand -base64 42)
 RESEND_API_KEY=$(openssl rand -base64 42)
-DAEMON_SERVER_KEY=$(openssl rand -base64 42)
-INNER_DIFY_KEY=$(openssl rand -base64 42)
+CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
 ```
 
 7) Create Namespace&Secret
@@ -120,15 +119,12 @@ kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key
 8) Helm Install Dify
 ```
 helm install <app_name> ./DifyOnAKS/charts/ \
---set image.api.tag=1.0.0 \
---set image.web.tag=1.0.0 \
+--set image.api.tag=0.15.3 \
+--set image.web.tag=0.15.3 \
 --set image.sandbox.tag=0.2.10 \
---set image.pluginDaemon.tag=0.0.4-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
---set pluginDaemon.auth.serverKey=$DAEMON_SERVER_KEY \
---set pluginDaemon.auth.difyApiKey=$INNER_DIFY_KEY \
 --set ingress.className='azure-application-gateway' \
 --set ingress.tls[0].hosts[0]='<domain_name>' \
 --set ingress.tls[0].secretName=certs-dify \
