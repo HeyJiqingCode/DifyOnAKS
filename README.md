@@ -41,15 +41,6 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
         <td>true</td>
     </tr>
     <tr>
-        <td rowspan="2">pluginDaemon</td>
-        <td>enabled</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>persistence.persistentVolumeClaim.storageClass</td>
-        <td>azurefile-csi</td>
-    </tr>
-    <tr>
         <td>postgresql</td>
         <td>enabled</td>
         <td>false</td>
