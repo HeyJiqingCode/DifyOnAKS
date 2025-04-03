@@ -4,7 +4,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ printf "%s" (include "dify.fullname" . | trunc 58)}}
+  name: {{ printf "%s" (include "dify.api.fullname" . | trunc 58)}}
 {{- with .Values.api.persistence.annotations  }}
   annotations:
 {{ toYaml . | indent 4 }}
