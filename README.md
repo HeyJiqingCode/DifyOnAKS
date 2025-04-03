@@ -14,13 +14,17 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
     </tr>
     <tr>
         <td>persistence.persistentVolumeClaim.storageClass</td>
-        <td>azurefile-csi</td>
+        <td>default</td>
     </tr>
     <tr>
-        <td>worker</td>
+        <td rowspan="2">worker</td>
         <td>enabled</td>
         <td>true</td>
     </tr>
+    <tr>
+        <td>persistence.persistentVolumeClaim.storageClass</td>
+        <td>default</td>
+    </tr> 
     <tr>
         <td rowspan="2">proxy</td>
         <td>enabled</td>
@@ -70,15 +74,6 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
         <td>enabled</td>
         <td>true</td>
     </tr>
-    <tr>
-        <td rowspan="2">ingress</td>
-        <td>enabled</td>
-        <td>true</td>
-    </tr>
-    <tr>
-        <td>className</td>
-        <td>azure-application-gateway</td>
-    </tr>
 </table>
 
 ## Architecture
@@ -93,30 +88,27 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
 
 ## Step-by-Step
 
-1) Create Application Gateway (backend pool without targets) ;
-2) Create AKS cluster with ingress-appgw addons enabled ;
-3) Create Azure Cache for Redis 
+1) Create AKS cluster with app-routing addon enabled ;
+2) Create Azure Cache for Redis 
     - Enable access keys authentication and non-ssl ;
     - Disable public access and create private endpoint ;
-4) Create Azure Database for PostgreSQL / Azure Cosmos DB for PostgreSQL
+3) Create Azure Database for PostgreSQL / Azure Cosmos DB for PostgreSQL
     - Install extension vector and uuid-ossp ;
     - Disable public access and create private endpoint ;
-5) Create Azure Storage Account / Container and disable public access and create private endpoint 
 
-6) Generate Keys
+4) Generate Keys
 ```
 API_SECRET_KEY=$(openssl rand -base64 42)
 RESEND_API_KEY=$(openssl rand -base64 42)
 CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
 ```
 
-7) Create Namespace&Secret
+5) Create Namespace
 ```
 kubectl create namespace dify
-kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key 
 ```
 
-8) Helm Install Dify
+6) Helm Install Dify
 ```
 helm install <app_name> ./DifyOnAKS/charts/ \
 --set image.api.tag=0.15.5 \
@@ -125,12 +117,6 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
---set ingress.className='azure-application-gateway' \
---set ingress.tls[0].hosts[0]='<domain_name>' \
---set ingress.tls[0].secretName=certs-dify \
---set ingress.hosts[0].host='<domain_name>' \
---set ingress.hosts[0].paths[0].path='/' \
---set ingress.hosts[0].paths[0].pathType=Prefix \
 --set externalRedis.host='<redis_host>' \
 --set externalRedis.password='<access_key>' \
 --set externalPostgres.username=postgres \

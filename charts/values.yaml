@@ -147,8 +147,8 @@ api:
       ##   set, choosing the default provisioner.
       ## ReadWriteMany access mode required for `api` and `worker`
       ##
-      storageClass: azurefile-csi
-      accessModes: ReadWriteMany
+      storageClass: default
+      accessModes: ReadWriteOnce
       size: 5Gi
       subPath: ""
 
@@ -207,7 +207,7 @@ proxy:
         ##   set, choosing the default provisioner.
         ## ReadWriteMany access mode required for nginx
         ##
-        storageClass: azurefile-csi
+        storageClass: default
         accessModes: ReadWriteMany
         size: 1Gi
         subPath: ""
@@ -292,8 +292,8 @@ ssrfProxy:
         ##   set, choosing the default provisioner.
         ## ReadWriteMany access mode required for squid
         ##
-        storageClass: azurefile-csi
-        accessModes: ReadWriteMany
+        storageClass: default
+        accessModes: ReadWriteOnce
         size: 1Gi
         subPath: ""
   service:
@@ -325,7 +325,7 @@ service:
 
 # Ingress Configuration
 ingress:
-  enabled: true
+  enabled: false
   className: "azure-application-gateway"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
