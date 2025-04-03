@@ -185,7 +185,7 @@ api:
   migration: true
   # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
   secretKey: "sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U"
-  ## Storage for `api` and `worker`
+  ## Storage for `api`
   ## Ignored if `.Values.externalS3.enabled` is true
   ##
   persistence:
@@ -266,7 +266,6 @@ worker:
   #        key: DB_PASSWORD
   logLevel: INFO
   ## Dify Worker ServiceAccount configuration
-  ##
   serviceAccount:
     ## @param worker.serviceAccount.create Specifies whether a ServiceAccount should be created
     ##
@@ -281,6 +280,26 @@ worker:
     ## @param worker.serviceAccount.annotations Additional custom annotations for the ServiceAccount
     ##
     annotations: {}
+  ## Storage for `worker`
+  ## Ignored if `.Values.externalS3.enabled` is true
+  ##
+  persistence:
+    mountPath: "/app/api/storage"
+    annotations:
+      helm.sh/resource-policy: keep
+    persistentVolumeClaim:
+      existingClaim: ""
+      ## Dify App Data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.
+      ## ReadWriteMany access mode required for `api` and `worker`
+      ##
+      storageClass: default
+      accessModes: ReadWriteOnce
+      size: 5Gi
+      subPath: ""
 
 
 # Dify Proxy Configuration

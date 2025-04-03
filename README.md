@@ -113,14 +113,9 @@ DAEMON_SERVER_KEY=$(openssl rand -base64 42)
 INNER_DIFY_KEY=$(openssl rand -base64 42)
 ```
 
-5) Create Namespace&Secret
+5) Generate Yaml
 ```
-kubectl create namespace dify
-```
-
-6) Helm Install Dify
-```
-helm install <app_name> ./DifyOnAKS/charts/ \
+helm template demo ./DifyOnAKS/charts/ \
 --set image.api.tag=1.1.3 \
 --set image.web.tag=1.1.3 \
 --set image.sandbox.tag=0.2.11 \
@@ -140,5 +135,11 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set externalPgvector.username=postgres \
 --set externalPgvector.password='<pg_password>' \
 --set externalPgvector.address='<pg_host>' \
---set externalPgvector.dbName=dify
+--set externalPgvector.dbName=dify > dify-1.1.3.yaml
+```
+
+6) Create Namespace & Deploy Dify
+```
+kubectl create namespace dify
+kubectl create -f dify-1.1.3.yaml -n dify
 ```
