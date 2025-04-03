@@ -103,14 +103,9 @@ RESEND_API_KEY=$(openssl rand -base64 42)
 CODE_EXECUTION_API_KEY=$(openssl rand -base64 42)
 ```
 
-5) Create Namespace
+5) Generate Yaml
 ```
-kubectl create namespace dify
-```
-
-6) Helm Install Dify
-```
-helm install <app_name> ./DifyOnAKS/charts/ \
+helm template demo ./DifyOnAKS/charts/ \
 --set image.api.tag=0.15.5 \
 --set image.web.tag=0.15.5 \
 --set image.sandbox.tag=0.2.11 \
@@ -126,5 +121,11 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set externalPgvector.username=postgres \
 --set externalPgvector.password='<pg_password>' \
 --set externalPgvector.address='<pg_host>' \
---set externalPgvector.dbName=dify
+--set externalPgvector.dbName=dify > dify-0.15.5.yaml
+```
+
+6) Create Namespace & Deploy Dify
+```
+kubectl create namespace dify
+kubectl create -f dify-0.15.5.yaml -n dify
 ```

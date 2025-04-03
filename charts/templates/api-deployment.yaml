@@ -110,6 +110,6 @@ spec:
       {{- if $usePvc }}
       - name: app-data
         persistentVolumeClaim:
-          claimName: {{ .Values.api.persistence.persistentVolumeClaim.existingClaim | default (printf "%s" (include "dify.fullname" . | trunc 58)) }}
+          claimName: {{ .Values.api.persistence.persistentVolumeClaim.existingClaim | default (printf "%s" (include "dify.api.fullname" . | trunc 58)) }}
       {{- end }}
 {{- end }}
