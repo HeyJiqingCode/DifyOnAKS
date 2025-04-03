@@ -118,7 +118,7 @@ INNER_DIFY_KEY=$(openssl rand -base64 42)
 kubectl create namespace dify
 ```
 
-8) Helm Install Dify
+6) Helm Install Dify
 ```
 helm install <app_name> ./DifyOnAKS/charts/ \
 --set image.api.tag=1.1.3 \
