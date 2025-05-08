@@ -116,10 +116,10 @@ INNER_DIFY_KEY=$(openssl rand -base64 42)
 5) Generate Yaml
 ```
 helm template demo ./DifyOnAKS/charts/ \
---set image.api.tag=1.2.0 \
---set image.web.tag=1.2.0 \
+--set image.api.tag=1.3.1 \
+--set image.web.tag=1.3.1 \
 --set image.sandbox.tag=0.2.11 \
---set image.pluginDaemon.tag=0.0.7-local \
+--set image.pluginDaemon.tag=0.0.9-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
@@ -135,11 +135,11 @@ helm template demo ./DifyOnAKS/charts/ \
 --set externalPgvector.username=postgres \
 --set externalPgvector.password='<pg_password>' \
 --set externalPgvector.address='<pg_host>' \
---set externalPgvector.dbName=dify > dify-1.1.3.yaml
+--set externalPgvector.dbName=dify > dify-1.3.1.yaml
 ```
 
 6) Create Namespace & Deploy Dify
 ```
 kubectl create namespace dify
-kubectl create -f dify-1.1.3.yaml -n dify
+kubectl create -f dify-1.3.1.yaml -n dify
 ```
