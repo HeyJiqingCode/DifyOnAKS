@@ -635,6 +635,7 @@ DB_DATABASE: {{ .Values.externalPostgres.database.pluginDaemon | quote }}
 {{- include "dify.pluginDaemon.db.config" .}}
 {{- include "dify.pluginDaemon.storage.config" .}}
 SERVER_PORT: "5002"
+DB_SSL_MODE: require
 PLUGIN_REMOTE_INSTALLING_HOST: "0.0.0.0"
 PLUGIN_REMOTE_INSTALLING_PORT: "5003"
 EXPOSE_PLUGIN_DEBUGGING_PORT: "5003"
