@@ -21,6 +21,11 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
         <td>enabled</td>
         <td>true</td>
     </tr>
+        <tr>
+        <td>beat</td>
+        <td>enabled</td>
+        <td>false</td>
+    </tr>
     <tr>
         <td rowspan="2">proxy</td>
         <td>enabled</td>
@@ -82,7 +87,7 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
     <tr>
         <td rowspan="2">ingress</td>
         <td>enabled</td>
-        <td>true</td>
+        <td>false</td>
     </tr>
     <tr>
         <td>className</td>
@@ -129,10 +134,10 @@ kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key
 8) Helm Install Dify
 ```
 helm install <app_name> ./DifyOnAKS/charts/ \
---set image.api.tag=1.3.1 \
---set image.web.tag=1.3.1 \
---set image.sandbox.tag=0.2.11 \
---set image.pluginDaemon.tag=0.0.9-local \
+--set image.api.tag=1.8.0 \
+--set image.web.tag=1.8.0 \
+--set image.sandbox.tag=0.2.12 \
+--set image.pluginDaemon.tag=0.2.0-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \

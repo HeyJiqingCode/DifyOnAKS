@@ -793,7 +793,7 @@ service:
 
 # Ingress Configuration
 ingress:
-  enabled: true
+  enabled: false
   className: "azure-application-gateway"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
