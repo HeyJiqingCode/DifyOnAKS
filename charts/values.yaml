@@ -2,7 +2,7 @@
 image:
   api:
     repository: langgenius/dify-api
-    tag: "1.3.1"
+    tag: "1.8.0"
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -10,7 +10,7 @@ image:
     #   - myRegistryKeySecretName
   web:    
     repository: langgenius/dify-web
-    tag: "1.3.1"
+    tag: "1.8.0"
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -18,7 +18,7 @@ image:
     #   - myRegistryKeySecretName
   sandbox:
     repository: langgenius/dify-sandbox
-    tag: "0.2.11"
+    tag: "0.2.12"
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -44,7 +44,7 @@ image:
 
   pluginDaemon:
     repository: langgenius/dify-plugin-daemon
-    tag: 0.0.9-local
+    tag: 0.2.0-local
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -61,6 +61,7 @@ api:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -93,6 +94,9 @@ api:
     timeoutSeconds: 5
     failureThreshold: 5
     successThreshold: 1
+  ## @param api.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   ## @param api.customLivenessProbe Custom livenessProbe that overrides the default one
   customLivenessProbe: {}
   ## @param api.customReadinessProbe Custom readinessProbe that overrides the default one
@@ -134,6 +138,36 @@ api:
     value: "30"
   - name: CODE_MAX_NUMBER_ARRAY_LENGTH
     value: "1000"
+  ## OpenTelemetry (OTEL) configuration
+  otel:
+    enabled: false
+    # OpenTelemetry trace endpoint
+    traceEndpoint: ""
+    # OpenTelemetry metric endpoint
+    metricEndpoint: ""
+    # OpenTelemetry base endpoint
+    baseEndpoint: "http://localhost:4318"
+    # OpenTelemetry API Key (sensitive - stored in secret)
+    apiKey: "YOUR API KEY"
+    # OpenTelemetry exporter protocol
+    exporterProtocol: ""
+    # OpenTelemetry exporter type
+    exporterType: "otlp"
+    # OpenTelemetry sampling rate
+    samplingRate: 0.1
+    # OpenTelemetry batch export schedule delay in milliseconds
+    batchExportScheduleDelay: 5000
+    # OpenTelemetry max queue size
+    maxQueueSize: 2048
+    # OpenTelemetry max export batch size
+    maxExportBatchSize: 512
+    # OpenTelemetry metric export interval in milliseconds
+    metricExportInterval: 60000
+    # OpenTelemetry batch export timeout in milliseconds
+    batchExportTimeout: 10000
+    # OpenTelemetry metric export timeout in milliseconds
+    metricExportTimeout: 30000
+
   service:
     port: 5001
     annotations: {}
@@ -169,7 +203,7 @@ api:
     type: "resend"
     resend:
       # Resend API Key
-      apiKey: "xxxx"
+      apiKey: "YOUR API KEY"
       # Resend API URL
       apiUrl: https://api.resend.com
     # SMTP Configuration
@@ -224,7 +258,6 @@ api:
 
 
 
-
 # Dify Worker Configuration
 worker:
   enabled: true
@@ -233,6 +266,7 @@ worker:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -247,6 +281,9 @@ worker:
   customReadinessProbe: {}
   ## @param worker.customStartupProbe Custom startupProbe that overrides the default one
   customStartupProbe: {}
+  ## @param worker.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   # Configure Pods Security Context
   podSecurityContext: {}
   # Configure Container Security Context
@@ -264,6 +301,7 @@ worker:
   #      secretKeyRef:
   #        name: my-secret
   #        key: DB_PASSWORD
+
   logLevel: INFO
   ## Dify Worker ServiceAccount configuration
   ##
@@ -283,6 +321,54 @@ worker:
     annotations: {}
 
 
+# Dify Beat Configuration
+beat:
+  enabled: false
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  priorityClassName: ""
+  ## Configure extra options for celery beat containers' liveness, readiness, and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param beat.customLivenessProbe Custom livenessProbe that overrides the default one (None)
+  customLivenessProbe: {}
+  ## @param beat.customReadinessProbe Custom readinessProbe that overrides the default one (None)
+  customReadinessProbe: {}
+  ## @param beat.customStartupProbe Custom startupProbe that overrides the default one (None)
+  customStartupProbe: {}
+  ## @param beat.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    type: Recreate
+  # Configure Pods Security Context
+  podSecurityContext: {}
+  # Configure Container Security Context
+  containerSecurityContext: {}
+  extraEnv:
+  # Apply your own Environment Variables if necessary.
+  # Variables defined here take higher priority than those from `ConfigMap` generated given `.Values`
+  # - name: ENABLE_CLEAN_EMBEDDING_CACHE_TASK
+  #   value: "false"
+  logLevel: INFO
+  ## celery beat ServiceAccount configuration
+  ##
+  serviceAccount:
+    ## @param beat.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param beat.serviceAccount.name The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the common.names.fullname template
+    ##
+    name: ""
+    ## @param beat.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ##
+    automountServiceAccountToken: false
+    ## @param beat.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+
+
 # Dify Proxy Configuration
 proxy:
   enabled: true
@@ -291,6 +377,7 @@ proxy:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   ## Configure extra options for proxy containers' liveness, readiness, and startup probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
   ## @param proxy.customLivenessProbe Custom livenessProbe that overrides the default one
@@ -301,6 +388,9 @@ proxy:
   customStartupProbe: {}
   ## @param proxy.clientMaxBodySize Custom client_max_body_size param nginx default: 15m
   clientMaxBodySize: ""
+  ## @param proxy.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   # Configure Pods Security Context
   podSecurityContext: {}
   # Configure Container Security Context
@@ -327,7 +417,7 @@ proxy:
         ##   set, choosing the default provisioner.
         ## ReadWriteMany access mode required for nginx
         ##
-        storageClass: azurefile-csi
+        storageClass:
         accessModes: ReadWriteMany
         size: 1Gi
         subPath: ""
@@ -362,6 +452,7 @@ web:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -394,6 +485,9 @@ web:
     timeoutSeconds: 5
     failureThreshold: 5
     successThreshold: 1
+  ## @param web.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   ## @param web.customLivenessProbe Custom livenessProbe that overrides the default one
   customLivenessProbe: {}
   ## @param web.customReadinessProbe Custom readinessProbe that overrides the default one
@@ -429,6 +523,9 @@ web:
     ## @param web.serviceAccount.annotations Additional custom annotations for the ServiceAccount
     ##
     annotations: {}
+  ## @param web.enableServiceLinks Disable this feature if additional environment variables would lead to `E2BIG` errors in case frontend were managed by `pm2`
+  ##
+  enableServiceLinks: false
 
 
 # Dify Sandbox Configuration
@@ -439,6 +536,7 @@ sandbox:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -471,6 +569,9 @@ sandbox:
     timeoutSeconds: 5
     failureThreshold: 2
     successThreshold: 1
+  ## @param sandbox.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   ## @param sandbox.customLivenessProbe Custom livenessProbe that overrides the default one
   customLivenessProbe: {}
   ## @param sandbox.customReadinessProbe Custom readinessProbe that overrides the default one
@@ -493,8 +594,7 @@ sandbox:
     labels: {}
     clusterIP: ""
   auth:
-    apiKey: "dify-sandbox"
-  privileged: false
+    apiKey: "YOUR API KEY"
   ## Sandbox ServiceAccount configuration
   ##
   serviceAccount:
@@ -521,6 +621,7 @@ ssrfProxy:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   ## Configure extra options for ssrf proxy containers' liveness, readiness, and startup probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
   ## @param ssrfProxy.customLivenessProbe Custom livenessProbe that overrides the default one
@@ -529,6 +630,9 @@ ssrfProxy:
   customReadinessProbe: {}
   ## @param ssrfProxy.customStartupProbe Custom startupProbe that overrides the default one
   customStartupProbe: {}
+  ## @param ssrfProxy.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   # Configure Pods Security Context
   podSecurityContext: {}
   # Configure Container Security Context
@@ -555,7 +659,7 @@ ssrfProxy:
         ##   set, choosing the default provisioner.
         ## ReadWriteMany access mode required for squid
         ##
-        storageClass: azurefile-csi
+        storageClass:
         accessModes: ReadWriteMany
         size: 1Gi
         subPath: ""
@@ -590,6 +694,7 @@ pluginDaemon:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  priorityClassName: ""
   ## Configure extra options for plugin daemon containers' liveness, readiness, and startup probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
   ## @param pluginDaemon.customLivenessProbe Custom livenessProbe that overrides the default one
@@ -598,6 +703,9 @@ pluginDaemon:
   customReadinessProbe: {}
   ## @param pluginDaemon.customStartupProbe Custom startupProbe that overrides the default one
   customStartupProbe: {}
+  ## @param pluginDaemon.updateStrategy Update strategy type and configuration parameters
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
   # Configure Pods Security Context
   podSecurityContext: {}
   # Configure Container Security Context
@@ -610,15 +718,18 @@ pluginDaemon:
     ports:
       daemon: 5002
       # Leave it unspecified in order NOT to expose port for remote installation as a `Service`.
-      pluginInstall:
+      pluginInstall: 5003
       # pluginInstall: 5003
     annotations: {}
     labels: {}
     clusterIP: ""
   auth:
-    serverKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
+    serverKey: "YOUR SERVER KEY"
     # A separate key for interactions between `api`(`worker`) and `pluginDaemon`
-    difyApiKey: "QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1"
+    difyApiKey: "YOUR API KEY"
+  ## Storage for `pluginDaemon`
+  ## Ignored if external object storage were configured via `.Values.externalS3` sections.
+  ##
   persistence:
     mountPath: "/app/storage"
     annotations:
@@ -739,8 +850,8 @@ externalAzureBlobStorage:
   enabled: false
   url: 'https://<your_account_name>.blob.core.windows.net'
   account: "xxx"
-  key: "difyai"
-  container: "difyai-container"
+  key: "YOUR AZURE STORAGE ACCOUNT KEY"
+  container: "YOUR AZURE STORAGE CONTAINER NAME"
 
 externalS3:
   # Amazon Simple Storage Service
@@ -773,31 +884,42 @@ externalGCS:
 externalCOS:
   # Tencent COS
   enabled: false
-  secretKey: "your-secret-key"
-  secretId: "your-secret-id"
-  region: "your-region"
-  bucketName: "your-bucket-name"
-  scheme: "your-scheme"
+  secretKey: "YOUR SECRET KEY"
+  secretId: "YOUR SECRET ID"
+  region: "YOUR REGION"
+  bucketName: "YOUR BUCKET NAME"
+  scheme: "YOUR SCHEME"
 
 externalOBS:
   # Huawei OBS
   enabled: false
-  secretKey: "your-secret-key"
-  secretId: "your-secret-id"
-  bucketName: "your-bucket-name"
-  server: "your-server"
+  secretKey: "YOUR SECRET KEY"
+  secretId: "YOUR SECRET ID"
+  bucketName: "YOUR BUCKET NAME"
+  server: "YOUR SERVER"
+
+externalTOS:
+  # External TOS Configuration
+  enabled: false
+  endpoint: "https://tos-cn-beijing.volces.com"
+  accessKey: "YOUR ACCESS KEY"
+  secretKey: "YOUR SECRET KEY"
+  bucketName:
+    api: "YOUR BUCKET NAME"
+    pluginDaemon: "YOUR PLUGIN DAEMON BUCKET NAME"
+  region: "cn-beijing"
 
 externalWeaviate:
   # External Weaviate Configuration
   enabled: false
   endpoint: "http://weaviate:8080"
-  apiKey: "YOUR API KEY  "
+  apiKey: "YOUR API KEY"
 
 externalQdrant:
   # External Qdrant Configuration
   enabled: false
   endpoint: "https://your-qdrant-cluster-url.qdrant.tech/"
-  apiKey: "YOUR ACCESS KEY"
+  apiKey: "YOUR API KEY"
   timeout: 20
   grpc:
     enabled: false
@@ -811,6 +933,52 @@ externalMilvus:
   user: "user"
   password: "Milvus"
   useTLS: false
+
+externalTencentVectorDB:
+  # External Tencent Vector DB Configuration
+  enabled: false
+  url: "your-tencent-vector-db-url"
+  apiKey: "YOUR API KEY"
+  timeout: 30
+  username: "root"
+  database: "dify"
+  shard: 1
+  replicas: 2
+
+externalMyScaleDB:
+  # External MyScaleDB Configuration
+  enabled: false
+  host: "myscale"
+  port: 8123
+  user: "default"
+  password: ""
+  database: "dify"
+  ftsParams: ""
+
+externalTableStore:
+  # External Table Store Configuration
+  enabled: false
+  endpoint: "endpoint"
+  instanceName: "instance-name"
+  accessKeyId: "YOUR SECRET ID"
+  accessKeySecret: "YOUR SECRET KEY"
+
+externalElasticsearch:
+  # External Elasticsearch Configuration
+  enabled: false
+  host: "elasticsearch.example.com"
+  port: 9200
+  username: ""
+  password: ""
+
+externalSecret:
+  # External secret store configuration
+  enabled: false
+  secretStore:
+    name: "default-secret-store"
+    kind: "SecretStore"
+  refreshInterval: "15m"
+  decodingStrategy: "None"
 
 
 resources: {}

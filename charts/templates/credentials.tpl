@@ -17,6 +17,9 @@ CODE_EXECUTION_API_KEY: {{ .Values.sandbox.auth.apiKey | b64enc | quote }}
 PLUGIN_DAEMON_KEY: {{ .Values.pluginDaemon.auth.serverKey | b64enc | quote }}
 INNER_API_KEY_FOR_PLUGIN: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quote }}
 {{- end }}
+{{- if and .Values.api.otel.enabled (not .Values.externalSecret.enabled) }}
+OTLP_API_KEY: {{ .Values.api.otel.apiKey | b64enc | quote }}
+{{- end }}
 {{- end }}
 
 {{- define "dify.worker.credentials" -}}
@@ -38,6 +41,9 @@ SECRET_KEY: {{ .Values.api.secretKey | b64enc | quote }}
 PLUGIN_DAEMON_KEY: {{ .Values.pluginDaemon.auth.serverKey | b64enc | quote }}
 INNER_API_KEY_FOR_PLUGIN: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quote }}
 {{- end }}
+{{- if and .Values.api.otel.enabled (not .Values.externalSecret.enabled) }}
+OTLP_API_KEY: {{ .Values.api.otel.apiKey | b64enc | quote }}
+{{- end }}
 {{- end }}
 
 {{- define "dify.web.credentials" -}}
@@ -48,7 +54,7 @@ INNER_API_KEY_FOR_PLUGIN: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quo
 DB_USERNAME: {{ .Values.externalPostgres.username | b64enc | quote }}
 DB_PASSWORD: {{ .Values.externalPostgres.password | b64enc | quote }}
 {{- else if .Values.postgresql.enabled }}
-  {{ with .Values.postgresql.global.postgresql.auth}}
+  {{ with .Values.postgresql.global.postgresql.auth }}
   {{- if empty .username }}
 DB_USERNAME: {{ print "postgres" | b64enc | quote }}
 DB_PASSWORD: {{ .postgresPassword | b64enc | quote }}
@@ -61,15 +67,24 @@ DB_PASSWORD: {{ .password | b64enc | quote }}
 {{- end }}
 
 {{- define "dify.storage.credentials" -}}
-{{- if .Values.externalS3.enabled}}
+{{- if and .Values.externalS3.enabled (not .Values.externalSecret.enabled)}}
 S3_ACCESS_KEY: {{ .Values.externalS3.accessKey | b64enc | quote }}
 S3_SECRET_KEY: {{ .Values.externalS3.secretKey | b64enc | quote }}
 {{- else if .Values.externalAzureBlobStorage.enabled }}
 # The Azure Blob storage configurations, only available when STORAGE_TYPE is `azure-blob`.
 AZURE_BLOB_ACCOUNT_KEY: {{ .Values.externalAzureBlobStorage.key | b64enc | quote }}
 {{- else if .Values.externalOSS.enabled }}
-ALIYUN_OSS_ACCESS_KEY: {{ .Values.externalOSS.accessKey | b64enc | quote  }}
-ALIYUN_OSS_SECRET_KEY: {{ .Values.externalOSS.secretKey | b64enc | quote  }}
+ALIYUN_OSS_ACCESS_KEY: {{ .Values.externalOSS.accessKey | b64enc | quote }}
+ALIYUN_OSS_SECRET_KEY: {{ .Values.externalOSS.secretKey | b64enc | quote }}
+{{- else if .Values.externalGCS.enabled }}
+GOOGLE_STORAGE_SERVICE_ACCOUNT_JSON_BASE64: {{ .Values.externalGCS.serviceAccountJsonBase64 | b64enc | quote }}
+{{- else if .Values.externalCOS.enabled }}
+TENCENT_COS_SECRET_KEY: {{ .Values.externalCOS.secretKey| b64enc | quote }}
+{{- else if .Values.externalOBS.enabled }}
+HUAWEI_OBS_ACCESS_KEY: {{ .Values.externalOBS.accessKey | b64enc | quote }}
+HUAWEI_OBS_SECRET_KEY: {{ .Values.externalOBS.secretKey | b64enc | quote }}
+{{- else if .Values.externalTOS.enabled }}
+VOLCENGINE_TOS_SECRET_KEY: {{ .Values.externalTOS.secretKey | b64enc | quote }}
 {{- else }}
 {{- end }}
 {{- end }}
@@ -93,7 +108,11 @@ REDIS_PASSWORD: {{ .auth.password | b64enc | quote }}
 # Use redis as the broker, and redis db 1 for celery broker.
 {{- if .Values.externalRedis.enabled }}
   {{- with .Values.externalRedis }}
-CELERY_BROKER_URL: {{ printf "redis://%s:%s@%s:%v/1" .username .password .host .port | b64enc | quote }}
+    {{- $scheme := "redis" }}
+    {{- if .useSSL }}
+      {{- $scheme = "rediss" }}
+    {{- end }}
+CELERY_BROKER_URL: {{ printf "%s://%s:%s@%s:%v/1" $scheme .username .password .host .port | b64enc | quote }}
   {{- end }}
 {{- else if .Values.redis.enabled }}
 {{- $redisHost := printf "%s-redis-master" .Release.Name -}}
@@ -109,8 +128,11 @@ WEAVIATE_API_KEY: {{ .Values.externalWeaviate.apiKey | b64enc | quote }}
 {{- else if .Values.externalQdrant.enabled }}
 QDRANT_API_KEY: {{ .Values.externalQdrant.apiKey | b64enc | quote }}
 {{- else if .Values.externalMilvus.enabled}}
+# the milvus token
+MILVUS_TOKEN: {{ .Values.externalMilvus.token | b64enc | quote }}
+# the milvus username
 MILVUS_USER: {{ .Values.externalMilvus.user | b64enc | quote }}
-# The milvus password.
+# the milvus password
 MILVUS_PASSWORD: {{ .Values.externalMilvus.password | b64enc | quote }}
 {{- else if .Values.externalPgvector.enabled}}
 PGVECTOR_USER: {{ .Values.externalPgvector.username | b64enc | quote }}
@@ -122,6 +144,13 @@ TENCENT_VECTOR_DB_API_KEY: {{ .Values.externalTencentVectorDB.apiKey | b64enc | 
 {{- else if .Values.externalMyScaleDB.enabled}}
 MYSCALE_USER: {{ .Values.externalMyScaleDB.username | b64enc | quote }}
 MYSCALE_PASSWORD: {{ .Values.externalMyScaleDB.password | b64enc | quote }}
+{{- else if .Values.externalTableStore.enabled}}
+TABLESTORE_ACCESS_KEY_ID: {{ .Values.externalTableStore.accessKeyId | b64enc | quote }}
+TABLESTORE_ACCESS_KEY_SECRET: {{ .Values.externalTableStore.accessKeySecret | b64enc | quote }}
+{{- else if .Values.externalElasticsearch.enabled}}
+# The Elasticsearch credentials
+ELASTICSEARCH_USERNAME: {{ .Values.externalElasticsearch.username | b64enc | quote }}
+ELASTICSEARCH_PASSWORD: {{ .Values.externalElasticsearch.password | b64enc | quote }}
 {{- else if .Values.weaviate.enabled }}
 # The Weaviate API key.
   {{- if .Values.weaviate.authentication.apikey }}
@@ -147,6 +176,24 @@ API_KEY: {{ .Values.sandbox.auth.apiKey | b64enc | quote }}
 {{- define "dify.pluginDaemon.credentials" -}}
 {{ include "dify.db.credentials" . }}
 {{ include "dify.redis.credentials" . }}
+{{ include "dify.pluginDaemon.storage.credentials" . }}
 SERVER_KEY: {{ .Values.pluginDaemon.auth.serverKey | b64enc | quote }}
 DIFY_INNER_API_KEY: {{ .Values.pluginDaemon.auth.difyApiKey | b64enc | quote }}
+{{- end }}
+
+{{- define "dify.pluginDaemon.storage.credentials" -}}
+{{- if and .Values.externalS3.enabled .Values.externalS3.bucketName.pluginDaemon }}
+AWS_ACCESS_KEY: {{ .Values.externalS3.accessKey | b64enc | quote }}
+AWS_SECRET_KEY: {{ .Values.externalS3.secretKey | b64enc | quote }}
+{{- else if and .Values.externalOSS.enabled .Values.externalOSS.bucketName.pluginDaemon }}
+ALIYUN_OSS_ACCESS_KEY_SECRET: {{ .Values.externalOSS.secretKey | b64enc | quote }}
+{{- else if and .Values.externalGCS.enabled .Values.externalGCS.bucketName.pluginDaemon }}
+GCS_CREDENTIALS: {{ .Values.externalGCS.serviceAccountJsonBase64 | b64enc | quote }}
+{{- else if and .Values.externalCOS.enabled .Values.externalCOS.bucketName.pluginDaemon }}
+TENCENT_COS_SECRET_KEY: {{ .Values.externalCOS.secretKey | b64enc | quote }}
+{{- else if and .Values.externalOBS.enabled .Values.externalOBS.bucketName.pluginDaemon }}
+HUAWEI_OBS_SECRET_KEY: {{ .Values.externalOBS.secretKey | b64enc | quote }}
+{{- else if and .Values.externalTOS.enabled .Values.externalTOS.bucketName.pluginDaemon }}
+PLUGIN_VOLCENGINE_TOS_SECRET_KEY: {{ .Values.externalTOS.secretKey | b64enc | quote }}
+{{- end }}
 {{- end }}
