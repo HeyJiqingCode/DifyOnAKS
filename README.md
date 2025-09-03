@@ -143,10 +143,13 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
 --set pluginDaemon.auth.serverKey=$DAEMON_SERVER_KEY \
 --set pluginDaemon.auth.difyApiKey=$INNER_DIFY_KEY \
+--set pluginDaemon.debug.debuggingHost=<plugin_remote_debug_domain_name>
+--set api.url.files=<you_can_keep_this_same_with_dify_domain_name> \
+--set api.url.appWeb=<you_can_keep_this_same_with_dify_domain_name> \
 --set ingress.className='azure-application-gateway' \
---set ingress.tls[0].hosts[0]='<domain_name>' \
+--set ingress.tls[0].hosts[0]='<dify_domain_name>' \
 --set ingress.tls[0].secretName=certs-dify \
---set ingress.hosts[0].host='<domain_name>' \
+--set ingress.hosts[0].host='<dify_domain_name>' \
 --set ingress.hosts[0].paths[0].path='/' \
 --set ingress.hosts[0].paths[0].pathType=Prefix \
 --set externalRedis.host='<redis_host>' \
