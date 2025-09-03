@@ -151,13 +151,13 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set ingress.hosts[0].paths[0].pathType=Prefix \
 --set externalRedis.host='<redis_host>' \
 --set externalRedis.password='<access_key>' \
+--set externalPostgres.address='<pg_host>' \
 --set externalPostgres.username=postgres \
 --set externalPostgres.password='<pg_password>' \
---set externalPostgres.address='<pg_host>' \
 --set externalPostgres.database.api=dify \
 --set externalPostgres.database.pluginDaemon=dify_plugin \
+--set externalPgvector.address='<pg_host>' \
 --set externalPgvector.username=postgres \
 --set externalPgvector.password='<pg_password>' \
---set externalPgvector.address='<pg_host>' \
 --set externalPgvector.dbName=dify
 ```
