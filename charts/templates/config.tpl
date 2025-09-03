@@ -26,6 +26,8 @@ APP_WEB_URL: {{ .Values.api.url.appWeb | quote }}
 # Url is signed and has expiration time.
 FILES_URL: {{ .Values.api.url.files | quote }}
 {{- include "dify.marketplace.config" . }}
+# The URL for plugin debugging
+EXPOSE_PLUGIN_DEBUGGING_HOST: {{ .Values.pluginDaemon.debug.debuggingHost | quote }}
 # When enabled, migrations will be executed prior to application startup and the application will start after the migrations have completed.
 MIGRATION_ENABLED: {{ .Values.api.migration | toString | quote }}
 
@@ -124,7 +126,8 @@ MODE: worker
 # example: http://cloud.dify.ai
 CONSOLE_WEB_URL: {{ .Values.api.url.consoleWeb | quote }}
 # --- All the configurations below are the same as those in the 'api' service. ---
-
+# The URL for plugin debugging
+EXPOSE_PLUGIN_DEBUGGING_HOST: {{ .Values.pluginDaemon.debug.debuggingHost | quote }}
 # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
 LOG_LEVEL: {{ .Values.worker.logLevel | quote }}
 # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
@@ -634,6 +637,8 @@ DB_DATABASE: {{ .Values.externalPostgres.database.pluginDaemon | quote }}
 SERVER_PORT: "5002"
 PLUGIN_REMOTE_INSTALLING_HOST: "0.0.0.0"
 PLUGIN_REMOTE_INSTALLING_PORT: "5003"
+EXPOSE_PLUGIN_DEBUGGING_PORT: "5003"
+EXPOSE_PLUGIN_DEBUGGING_HOST: {{ .Values.pluginDaemon.debug.debuggingHost | quote }}
 MAX_PLUGIN_PACKAGE_SIZE: "52428800"
 PLUGIN_STDIO_BUFFER_SIZE: "1024"
 PLUGIN_STDIO_MAX_BUFFER_SIZE: "5242880"

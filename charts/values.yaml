@@ -753,6 +753,9 @@ pluginDaemon:
     # If enabled, route marketplace api call to built-in `nginx` and strip headers for tracking.
     # https://github.com/BorisPolonsky/dify-helm/pull/131
     apiProxyEnabled: false
+  debug:
+    debuggingPort: 5003
+    debuggingHost: "localhost"
   ## pluginDaemon ServiceAccount configuration
   ##
   serviceAccount:
