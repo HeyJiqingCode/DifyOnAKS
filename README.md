@@ -14,7 +14,7 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
     </tr>
     <tr>
         <td>persistence.persistentVolumeClaim.storageClass</td>
-        <td>azurefile-csi</td>
+        <td>nfs-csi</td>
     </tr>
     <tr>
         <td>worker</td>
@@ -52,7 +52,7 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
     </tr>
     <tr>
         <td>persistence.persistentVolumeClaim.storageClass</td>
-        <td>azurefile-csi</td>
+        <td>nfs-csi</td>
     </tr>
     <tr>
         <td>postgresql</td>
@@ -143,12 +143,6 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
 --set pluginDaemon.auth.serverKey=$DAEMON_SERVER_KEY \
 --set pluginDaemon.auth.difyApiKey=$INNER_DIFY_KEY \
---set ingress.className='azure-application-gateway' \
---set ingress.tls[0].hosts[0]='<dify_domain_name>' \
---set ingress.tls[0].secretName=certs-dify \
---set ingress.hosts[0].host='<dify_domain_name>' \
---set ingress.hosts[0].paths[0].path='/' \
---set ingress.hosts[0].paths[0].pathType=Prefix \
 --set externalRedis.host='<redis_host>' \
 --set externalRedis.password='<access_key>' \
 --set externalPostgres.address='<pg_host>' \

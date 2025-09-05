@@ -235,7 +235,7 @@ api:
       ##   set, choosing the default provisioner.
       ## ReadWriteMany access mode required for `api` and `worker`
       ##
-      storageClass: azurefile-csi
+      storageClass: nfs-csi
       accessModes: ReadWriteMany
       size: 5Gi
       subPath: ""
@@ -743,7 +743,7 @@ pluginDaemon:
       ##   set, choosing the default provisioner.
       ## ReadWriteMany access mode required for `pluginDaemon`
       ##
-      storageClass: azurefile-csi
+      storageClass: nfs-csi
       accessModes: ReadWriteMany
       size: 5Gi
       subPath: ""
