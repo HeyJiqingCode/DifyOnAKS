@@ -87,7 +87,7 @@ Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubern
     <tr>
         <td rowspan="2">ingress</td>
         <td>enabled</td>
-        <td>false</td>
+        <td>true</td>
     </tr>
     <tr>
         <td>className</td>
@@ -161,3 +161,7 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set externalPgvector.password='<pg_password>' \
 --set externalPgvector.dbName=dify
 ```
+
+## More Details
+
+See [Hosting Dify with Azure Services](https://heyjiqing.notion.site/Hosting-Dify-with-Azure-Services-1a7de7b6e4e8808b96f8d5a7290e5527?pvs=74)
