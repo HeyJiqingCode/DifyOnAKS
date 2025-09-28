@@ -1,5 +1,5 @@
 ## DifyOnAKS
-Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubernetes Services) with helm chart.
+Helm charts for deploying [langgenius/dify](https://github.com/langgenius/dify) on Azure, using services such as Azure Kubernetes Service (AKS), Azure Storage Account, Azure Cache for Redis, Azure Database for PostgreSQL, etc.
 
 ## Default Values
 <table>
