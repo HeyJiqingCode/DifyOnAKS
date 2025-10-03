@@ -134,21 +134,17 @@ kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key
 8) Helm Install Dify
 ```
 helm install <app_name> ./DifyOnAKS/charts/ \
---set image.api.tag=1.8.0 \
---set image.web.tag=1.8.0 \
+--set image.api.tag=1.9.1 \
+--set image.web.tag=1.9.1 \
 --set image.sandbox.tag=0.2.12 \
---set image.pluginDaemon.tag=0.2.0-local \
+--set image.pluginDaemon.tag=0.3.0-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \
 --set pluginDaemon.auth.serverKey=$DAEMON_SERVER_KEY \
 --set pluginDaemon.auth.difyApiKey=$INNER_DIFY_KEY \
---set ingress.className='azure-application-gateway' \
---set ingress.tls[0].hosts[0]='<dify_domain_name>' \
---set ingress.tls[0].secretName=certs-dify \
---set ingress.hosts[0].host='<dify_domain_name>' \
---set ingress.hosts[0].paths[0].path='/' \
---set ingress.hosts[0].paths[0].pathType=Prefix \
+--set pluginDaemon.debug.debuggingHost='<plugin_debug_url>' \
+--set api.url.files='<files_url>' \
 --set externalRedis.host='<redis_host>' \
 --set externalRedis.password='<access_key>' \
 --set externalPostgres.address='<pg_host>' \
