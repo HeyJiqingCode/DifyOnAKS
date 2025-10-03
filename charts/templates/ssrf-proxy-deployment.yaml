@@ -8,7 +8,6 @@ metadata:
   labels:
 {{- include "dify.labels" . | nindent 4 }}
     component: ssrf-proxy
-    # app: {{ template "dify.ssrfProxy.fullname" . }}
 {{ include "dify.ud.labels" . | indent 4 }}
   name: {{ template "dify.ssrfProxy.fullname" . }}
 spec:

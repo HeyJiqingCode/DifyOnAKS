@@ -17,7 +17,6 @@ metadata:
   labels:
 {{- include "dify.labels" . | nindent 4 }}
     component: plugin-daemon
-    # app: {{ template "dify.pluginDaemon.fullname" . }}
 {{ include "dify.ud.labels" . | indent 4 }}
   name: {{ template "dify.pluginDaemon.fullname" . }}
 spec:

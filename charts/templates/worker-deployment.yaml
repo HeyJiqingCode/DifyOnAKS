@@ -9,7 +9,6 @@ metadata:
   labels:
 {{- include "dify.labels" . | nindent 4 }}
     component: worker
-    # app: {{ template "dify.worker.fullname" . }}
 {{ include "dify.ud.labels" . | indent 4 }}
   name: {{ template "dify.worker.fullname" . }}
 spec:

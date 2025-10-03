@@ -8,7 +8,6 @@ metadata:
   labels:
 {{- include "dify.labels" . | nindent 4 }}
     component: web
-    # app: {{ template "dify.web.fullname" . }}
 {{ include "dify.ud.labels" . | indent 4 }}
   name: {{ template "dify.web.fullname" . }}
 spec:
