@@ -413,7 +413,10 @@ ELASTICSEARCH_PORT: {{ .Values.externalElasticsearch.port | toString | quote }}
 VECTOR_STORE: weaviate
   {{- with .Values.weaviate.service }}
     {{- if and (eq .type "ClusterIP") (not (eq .clusterIP "None"))}}
-{{}}
+{{/*
+Pitfall: scheme (i.e.) must be supecified, or weviate client won't function as
+it depends on `hostname` from urllib.parse.urlparse will be empty if schema is not specified.
+*/}}
 WEAVIATE_ENDPOINT: {{ printf "http://%s" .name | quote }}
     {{- end }}
   {{- end }}
