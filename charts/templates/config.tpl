@@ -1,33 +1,51 @@
-{{- define "dify.api.config" -}}
-# Startup mode, 'api' starts the API server.
-MODE: api
-# The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
-LOG_LEVEL: {{ .Values.api.logLevel | quote }}
-# A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
-# SECRET_KEY: {{ .Values.api.secretKey }}
-# The base URL of console application web frontend, refers to the Console base URL of WEB service if console domain is
-# different from api or web app domain.
-# example: http://cloud.dify.ai
-CONSOLE_WEB_URL: {{ .Values.api.url.consoleWeb | quote }}
-# The base URL of console application api server, refers to the Console base URL of WEB service if console domain is
-# different from api or web app domain.
-# example: http://cloud.dify.ai
-CONSOLE_API_URL: {{ .Values.api.url.consoleApi | quote }}
-# The URL prefix for Service API endpoints, refers to the base URL of the current API service if api domain is
-# different from console domain.
-# example: http://api.dify.ai
-SERVICE_API_URL: {{ .Values.api.url.serviceApi | quote }}
-# The URL prefix for Web APP frontend, refers to the Web App base URL of WEB service if web app domain is different from
-# console or api domain.
-# example: http://udify.app
-APP_WEB_URL: {{ .Values.api.url.appWeb | quote }}
-# File preview or download Url prefix.
-# used to display File preview or download Url to the front-end or as Multi-model inputs;
-# Url is signed and has expiration time.
-FILES_URL: {{ .Values.api.url.files | quote }}
-{{- include "dify.marketplace.config" . }}
+{{- define "dify.common.config" -}}
+# Shared configurations
 # The URL for plugin debugging
 EXPOSE_PLUGIN_DEBUGGING_HOST: {{ .Values.pluginDaemon.debug.debuggingHost | quote }}
+EXPOSE_PLUGIN_DEBUGGING_PORT: {{ .Values.pluginDaemon.debug.debuggingPort | toString | quote }}
+
+# GraphEngine Worker Pool Configuration
+GRAPH_ENGINE_MIN_WORKERS: "1"
+GRAPH_ENGINE_MAX_WORKERS: "10"
+GRAPH_ENGINE_SCALE_DOWN_IDLE_TIME: "5.0"
+GRAPH_ENGINE_SCALE_UP_THRESHOLD: "3"
+
+# Knowledge Configuration
+UPLOAD_FILE_SIZE_LIMIT: "15"
+UPLOAD_FILE_BATCH_LIMIT: "5"
+ETL_TYPE: "dify"
+UNSTRUCTURED_API_URL: ""
+UNSTRUCTURED_API_KEY: ""
+SCARF_NO_ANALYTICS: "true"
+
+# Ensure UTF-8 encoding
+LANG: "en_US.UTF-8"
+LC_ALL: "en_US.UTF-8"
+PYTHONIOENCODING: "utf-8"
+
+# Log Settings
+LOG_FILE: "/app/logs/server.log"
+LOG_FILE_MAX_SIZE: "20"
+LOG_FILE_BACKUP_COUNT: "5"
+LOG_DATEFORMAT: "%Y-%m-%d %H:%M:%S"
+
+# URL settings
+CONSOLE_WEB_URL: {{ .Values.api.url.consoleWeb | quote }}
+CONSOLE_API_URL: {{ .Values.api.url.consoleApi | quote }}
+SERVICE_API_URL: {{ .Values.api.url.serviceApi | quote }}
+APP_WEB_URL: {{ .Values.api.url.appWeb | quote }}
+FILES_URL: {{ .Values.api.url.files | quote }}
+CHECK_UPDATE_URL: "https://updates.dify.ai"
+{{- end }}
+
+{{- define "dify.api.config" -}}
+# Configuration for the Dify API service
+# Startup mode, 'api' starts the API server.
+MODE: api
+
+# The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+LOG_LEVEL: {{ .Values.api.logLevel | quote }}
+
 # When enabled, migrations will be executed prior to application startup and the application will start after the migrations have completed.
 MIGRATION_ENABLED: {{ .Values.api.migration | toString | quote }}
 
@@ -41,40 +59,43 @@ MAX_TREE_DEPTH: "50"
 SWAGGER_UI_ENABLED: "true"
 SWAGGER_UI_PATH: "/swagger-ui.html"
 
+# Specifies the allowed origins for cross-origin requests to the Web and console API, e.g. https://dify.app or * for all origins.
+WEB_API_CORS_ALLOW_ORIGINS: '*'
+CONSOLE_CORS_ALLOW_ORIGINS: '*'
+
+# The configurations for marketplace integration.
+{{ include "dify.marketplace.config" . }}
+
+# The configurations shared by multiple services
+{{ include "dify.common.config" . }}
 
 # The configurations of postgres database connection.
-# It is consistent with the configuration in the 'db' service below.
 {{- include "dify.db.config" . }}
 
 # The configurations of redis connection.
-# It is consistent with the configuration in the 'redis' service below.
 {{- include "dify.redis.config" . }}
+
+# The configurations of file storage.
+{{ include "dify.storage.config" . }}
+
+#The Vector store configurations.
+{{ include "dify.vectordb.config" . }}
 
 # The configurations of celery broker.
 {{- include "dify.celery.config" . }}
-# Specifies the allowed origins for cross-origin requests to the Web API, e.g. https://dify.app or * for all origins.
-WEB_API_CORS_ALLOW_ORIGINS: '*'
-# Specifies the allowed origins for cross-origin requests to the console API, e.g. https://cloud.dify.ai or * for all origins.
-CONSOLE_CORS_ALLOW_ORIGINS: '*'
-# CSRF Cookie settings
-# Controls whether a cookie is sent with cross-site requests,
-# providing some protection against cross-site request forgery attacks
-#
-# Default: `SameSite=Lax, Secure=false, HttpOnly=true`
-# This default configuration supports same-origin requests using either HTTP or HTTPS,
-# but does not support cross-origin requests. It is suitable for local debugging purposes.
-#
-# If you want to enable cross-origin support,
-# you must use the HTTPS protocol and set the configuration to `SameSite=None, Secure=true, HttpOnly=true`.
-#
 
-{{ include "dify.storage.config" . }}
-{{ include "dify.vectordb.config" . }}
+# The configurations of celery backend
+CELERY_BACKEND: redis
+
+# The configurations for sending emails.
 {{ include "dify.mail.config" . }}
+
 # The DSN for Sentry error reporting. If not set, Sentry error reporting will be disabled.
 SENTRY_DSN: ''
+
 # The sample rate for Sentry events. Default: `1.0`
 SENTRY_TRACES_SAMPLE_RATE: "1.0"
+
 # The sample rate for Sentry profiles. Default: `1.0`
 SENTRY_PROFILES_SAMPLE_RATE: "1.0"
 
@@ -91,8 +112,8 @@ SSRF_PROXY_HTTPS_URL: http://{{ template "dify.ssrfProxy.fullname" .}}:{{ .Value
 PLUGIN_DAEMON_URL: http://{{ template "dify.pluginDaemon.fullname" .}}:{{ .Values.pluginDaemon.service.ports.daemon }}
 {{- end }}
 
-{{- if .Values.api.otel.enabled }}
 # OpenTelemetry configuration
+{{- if .Values.api.otel.enabled }}
 ENABLE_OTEL: {{ .Values.api.otel.enabled | toString | quote }}
 {{- if .Values.api.otel.traceEndpoint }}
 OTLP_TRACE_ENDPOINT: {{ .Values.api.otel.traceEndpoint | quote }}
@@ -116,44 +137,46 @@ OTEL_METRIC_EXPORT_TIMEOUT: {{ .Values.api.otel.metricExportTimeout | toString |
 {{- end }}
 
 {{- define "dify.worker.config" -}}
-# worker service
-# The Celery worker for processing the queue.
+# Configuration for the Dify Worker service
 # Startup mode, 'worker' starts the Celery worker for processing the queue.
 MODE: worker
 
-# The base URL of console application web frontend, refers to the Console base URL of WEB service if console domain is
-# different from api or web app domain.
-# example: http://cloud.dify.ai
-CONSOLE_WEB_URL: {{ .Values.api.url.consoleWeb | quote }}
-# --- All the configurations below are the same as those in the 'api' service. ---
-# The URL for plugin debugging
-EXPOSE_PLUGIN_DEBUGGING_HOST: {{ .Values.pluginDaemon.debug.debuggingHost | quote }}
 # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
 LOG_LEVEL: {{ .Values.worker.logLevel | quote }}
-# A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
-# same as the API service
-# SECRET_KEY: {{ .Values.api.secretKey }}
+
+# Specifies the allowed origins for cross-origin requests to the Web and console API, e.g. https://dify.app or * for all origins.
+WEB_API_CORS_ALLOW_ORIGINS: '*'
+CONSOLE_CORS_ALLOW_ORIGINS: '*'
+
+# The configurations for marketplace integration.
+{{ include "dify.marketplace.config" . }}
+
+# The configurations shared by multiple services
+{{ include "dify.common.config" . }}
+
 # The configurations of postgres database connection.
-# It is consistent with the configuration in the 'db' service below.
 {{ include "dify.db.config" . }}
 
 # The configurations of redis cache connection.
 {{ include "dify.redis.config" . }}
-# The configurations of celery broker.
-{{ include "dify.celery.config" . }}
-# The configurations of celery backend
-CELERY_BACKEND: redis
+
+# The configurations of file storage.
 {{ include "dify.storage.config" . }}
+
 # The Vector store configurations.
 {{ include "dify.vectordb.config" . }}
-{{ include "dify.mail.config" . }}
-{{- if .Values.pluginDaemon.enabled }}
-PLUGIN_DAEMON_URL: http://{{ template "dify.pluginDaemon.fullname" .}}:{{ .Values.pluginDaemon.service.ports.daemon }}
-{{- end }}
-{{- include "dify.marketplace.config" . }}
 
-{{- if .Values.api.otel.enabled }}
+# The configurations for sending emails.
+{{ include "dify.mail.config" . }}
+
+# The configurations of celery broker.
+{{ include "dify.celery.config" . }}
+
+# The configurations of celery backend
+CELERY_BACKEND: redis
+
 # OpenTelemetry configuration
+{{- if .Values.api.otel.enabled }}
 ENABLE_OTEL: {{ .Values.api.otel.enabled | toString | quote }}
 {{- if .Values.api.otel.traceEndpoint }}
 OTLP_TRACE_ENDPOINT: {{ .Values.api.otel.traceEndpoint | quote }}
@@ -177,14 +200,17 @@ OTEL_METRIC_EXPORT_TIMEOUT: {{ .Values.api.otel.metricExportTimeout | toString |
 {{- end }}
 
 {{- define "dify.web.config" -}}
+# Configuration for the Dify Web service
 # The base URL of console application api server, refers to the Console base URL of WEB service if console domain is
 # different from api or web app domain.
 # example: http://cloud.dify.ai
 CONSOLE_API_URL: {{ .Values.api.url.consoleApi | quote }}
+
 # The URL for Web APP api server, refers to the Web App base URL of WEB service if web app domain is different from
 # console or api domain.
 # example: http://udify.app
 APP_API_URL: {{ .Values.api.url.appApi | quote }}
+
 # The DSN for Sentry
 {{- if and .Values.pluginDaemon.enabled .Values.pluginDaemon.marketplace.enabled .Values.pluginDaemon.marketplace.apiProxyEnabled }}
 MARKETPLACE_ENABLED: "true"
@@ -196,20 +222,16 @@ MARKETPLACE_URL: {{ .Values.api.url.marketplace | quote }}
 {{- end }}
 
 {{- define "dify.db.config" -}}
+# The configurations of postgres database connection.
+
 {{- if .Values.externalPostgres.enabled }}
-# DB_USERNAME: {{ .Values.externalPostgres.username | quote }}
-# DB_PASSWORD: {{ .Values.externalPostgres.password | quote }}
 DB_HOST: {{ .Values.externalPostgres.address }}
 DB_PORT: {{ .Values.externalPostgres.port | toString | quote }}
 DB_DATABASE: {{ .Values.externalPostgres.database.api | quote }}
 {{- else if .Values.postgresql.enabled }}
   {{ with .Values.postgresql.global.postgresql.auth }}
   {{- if empty .username }}
-# DB_USERNAME: postgres
-# DB_PASSWORD: {{ .postgresPassword | quote }}
   {{- else }}
-# DB_USERNAME: {{ .username | quote }}
-# DB_PASSWORD: {{ .password | quote }}
   {{- end }}
   {{- end }}
   {{- if eq .Values.postgresql.architecture "replication" }}
@@ -223,60 +245,60 @@ DB_DATABASE: {{ .Values.postgresql.global.postgresql.auth.database }}
 {{- end }}
 
 {{- define "dify.storage.config" -}}
+# The configurations of file storage.
+
 {{- if .Values.externalS3.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
-STORAGE_TYPE: s3
+# The type of storage to use for storing user files. Default value is `local`.
 # The S3 storage configurations, only available when STORAGE_TYPE is `s3`.
+STORAGE_TYPE: s3
 S3_ENDPOINT: {{ .Values.externalS3.endpoint | quote }}
 S3_BUCKET_NAME: {{ .Values.externalS3.bucketName.api | quote }}
-# S3_ACCESS_KEY: {{ .Values.externalS3.accessKey | quote }}
-# S3_SECRET_KEY: {{ .Values.externalS3.secretKey | quote }}
 S3_REGION: {{ .Values.externalS3.region | quote }}
 S3_USE_AWS_MANAGED_IAM: {{ .Values.externalS3.useIAM | toString | quote }}
+
 {{- else if .Values.externalAzureBlobStorage.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
-STORAGE_TYPE: azure-blob
+# The type of storage to use for storing user files. Default value is `local`.
 # The Azure Blob storage configurations, only available when STORAGE_TYPE is `azure-blob`.
+STORAGE_TYPE: azure-blob
 AZURE_BLOB_ACCOUNT_NAME: {{ .Values.externalAzureBlobStorage.account | quote }}
-# AZURE_BLOB_ACCOUNT_KEY: {{ .Values.externalAzureBlobStorage.key | quote }}
 AZURE_BLOB_CONTAINER_NAME: {{ .Values.externalAzureBlobStorage.container | quote }}
 AZURE_BLOB_ACCOUNT_URL: {{ .Values.externalAzureBlobStorage.url | quote }}
+
 {{- else if .Values.externalOSS.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
+# The type of storage to use for storing user files. Default value is `local`.
+# The Aliyun OSS storage configurations, only available when STORAGE_TYPE is `aliyun-oss`.
 STORAGE_TYPE: aliyun-oss
-# The OSS storage configurations, only available when STORAGE_TYPE is `aliyun-oss`.
 ALIYUN_OSS_ENDPOINT: {{ .Values.externalOSS.endpoint | quote }}
 ALIYUN_OSS_BUCKET_NAME: {{ .Values.externalOSS.bucketName.api | quote }}
-# ALIYUN_OSS_ACCESS_KEY: {{ .Values.externalOSS.accessKey | quote }}
-# ALIYUN_OSS_SECRET_KEY: {{ .Values.externalOSS.secretKey | quote }}
 ALIYUN_OSS_REGION: {{ .Values.externalOSS.region | quote }}
 ALIYUN_OSS_AUTH_VERSION: {{ .Values.externalOSS.authVersion | quote }}
 ALIYUN_OSS_PATH: {{ .Values.externalOSS.path | quote }}
+
 {{- else if .Values.externalGCS.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss` and `google-storage`, Default: `local`
+# The type of storage to use for storing user files. Default value is `local`.
+# The Google Cloud Storage configurations, only available when STORAGE_TYPE is `google-storage`.
 STORAGE_TYPE: google-storage
 GOOGLE_STORAGE_BUCKET_NAME: {{ .Values.externalGCS.bucketName.api | quote }}
-# GOOGLE_STORAGE_SERVICE_ACCOUNT_JSON_BASE64: {{ .Values.externalGCS.serviceAccountJsonBase64 | quote }}
+
 {{- else if .Values.externalCOS.enabled }}
-# The type of storage to use for storing user files. Supported values are `local`, `s3`, `azure-blob`, `aliyun-oss`, `google-storage` and `tencent-cos`, Default: `local`
+# The type of storage to use for storing user files. Default value is `local`.
+# The Tencent COS configurations, only available when STORAGE_TYPE is `tencent-cos`.
 STORAGE_TYPE: tencent-cos
-# The name of the Tencent COS bucket to use for storing files.
 TENCENT_COS_BUCKET_NAME: {{ .Values.externalCOS.bucketName.api | quote }}
-# The secret key to use for authenticating with the Tencent COS service.
-# TENCENT_COS_SECRET_KEY: {{ .Values.externalCOS.secretKey | quote }}
-# The secret id to use for authenticating with the Tencent COS service.
 TENCENT_COS_SECRET_ID: {{ .Values.externalCOS.secretId | quote }}
-# The region of the Tencent COS service.
 TENCENT_COS_REGION: {{ .Values.externalCOS.region | quote }}
-# The scheme of the Tencent COS service.
 TENCENT_COS_SCHEME: {{ .Values.externalCOS.scheme | quote }}
+
 {{- else if .Values.externalOBS.enabled }}
+# The type of storage to use for storing user files. Default value is `local`.
+# The Huawei OBS configurations, only available when STORAGE_TYPE is `huawei-obs`.
 STORAGE_TYPE: huawei-obs
 HUAWEI_OBS_SERVER: {{ .Values.externalOBS.endpoint | quote }}
 HUAWEI_OBS_BUCKET_NAME: {{ .Values.externalOBS.bucketName.api | quote }}
-# HUAWEI_OBS_ACCESS_KEY: {{ .Values.externalOBS.accessKey | quote }}
-# HUAWEI_OBS_SECRET_KEY: {{ .Values.externalOBS.secretKey | quote }}
+
 {{- else if .Values.externalTOS.enabled }}
+# The type of storage to use for storing user files. Default value is `local`.
+# The Volcengine TOS configurations, only available when
 STORAGE_TYPE: "volcengine-tos"
 VOLCENGINE_TOS_ENDPOINT: {{ .Values.externalTOS.endpoint | quote }}
 VOLCENGINE_TOS_REGION: {{ .Values.externalTOS.region | quote }}
@@ -284,23 +306,21 @@ VOLCENGINE_TOS_BUCKET_NAME: {{ .Values.externalTOS.bucketName.api | quote }}
 VOLCENGINE_TOS_ACCESS_KEY: {{ .Values.externalTOS.accessKey | quote }}
 # VOLCENGINE_TOS_SECRET_KEY: {{ .Values.externalTOS.secretKey | quote }}
 {{- else }}
-# The type of storage to use for storing user files. Supported values are `local` and `s3` and `azure-blob`, Default: `local`
+
+# The local storage configurations, only available when STORAGE_TYPE is `local`.
 STORAGE_TYPE: local
-# The path to the local storage directory, the directory relative the root path of API service codes or absolute path. Default: `storage` or `/home/john/storage`.
-# only available when STORAGE_TYPE is `local`.
 STORAGE_LOCAL_PATH: {{ .Values.api.persistence.mountPath | quote }}
 {{- end }}
 {{- end }}
 
 {{- define "dify.redis.config" -}}
+# The configurations of redis connection.
+
 {{- if .Values.externalRedis.enabled }}
   {{- with .Values.externalRedis }}
 REDIS_HOST: {{ .host | quote }}
 REDIS_PORT: {{ .port | toString | quote }}
-# REDIS_USERNAME: {{ .username | quote }}
-# REDIS_PASSWORD: {{ .password | quote }}
 REDIS_USE_SSL: {{ .useSSL | toString | quote }}
-# use redis db 0 for redis cache
 REDIS_DB: "0"
   {{- end }}
 {{- else if .Values.redis.enabled }}
@@ -308,141 +328,118 @@ REDIS_DB: "0"
   {{- with .Values.redis }}
 REDIS_HOST: {{ $redisHost }}
 REDIS_PORT: {{ .master.service.ports.redis | toString | quote }}
-# REDIS_USERNAME: ""
-# REDIS_PASSWORD: {{ .auth.password | quote }}
 REDIS_USE_SSL: {{ .tls.enabled | toString | quote }}
-# use redis db 0 for redis cache
 REDIS_DB: "0"
   {{- end }}
 {{- end }}
 {{- end }}
 
 {{- define "dify.celery.config" -}}
-# Use redis as the broker, and redis db 1 for celery broker.
+# The configurations of celery broker.
 {{- if .Values.externalRedis.enabled }}
   {{- with .Values.externalRedis }}
     {{- $scheme := "redis" }}
     {{- if .useSSL }}
       {{- $scheme = "rediss" }}
     {{- end }}
-# CELERY_BROKER_URL: {{ printf "%s://%s:%s@%s:%v/1" $scheme .username .password .host .port }}
   {{- end }}
 {{- else if .Values.redis.enabled }}
 {{- $redisHost := printf "%s-redis-master" .Release.Name -}}
   {{- with .Values.redis }}
-# CELERY_BROKER_URL: {{ printf "redis://:%s@%s:%v/1" .auth.password $redisHost .master.service.ports.redis }}
   {{- end }}
 {{- end }}
 {{- end }}
 
 {{- define "dify.vectordb.config" -}}
+# The Vector store configurations.
+# The external Weaviate configurations.
 {{- if .Values.externalWeaviate.enabled }}
-# The type of vector store to use. Supported values are `weaviate`, `qdrant`, `milvus`, `pgvector`, `tencent`, `myscale`.
 VECTOR_STORE: weaviate
-# The Weaviate endpoint URL. Only available when VECTOR_STORE is `weaviate`.
 WEAVIATE_ENDPOINT: {{ .Values.externalWeaviate.endpoint | quote }}
-# The Weaviate API key.
-# WEAVIATE_API_KEY: {{ .Values.externalWeaviate.apiKey }}
+
+# The external Qdrant configurations.
 {{- else if .Values.externalQdrant.enabled }}
 VECTOR_STORE: qdrant
-# The Qdrant endpoint URL. Only available when VECTOR_STORE is `qdrant`.
 QDRANT_URL: {{ .Values.externalQdrant.endpoint | quote }}
-# The Qdrant API key.
-# QDRANT_API_KEY: {{ .Values.externalQdrant.apiKey | quote }}
-# The Qdrant clinet timeout setting.
 QDRANT_CLIENT_TIMEOUT: {{ .Values.externalQdrant.timeout | quote }}
-# The Qdrant client enable gRPC mode.
 QDRANT_GRPC_ENABLED: {{ .Values.externalQdrant.grpc.enabled | toString | quote }}
-# The Qdrant server gRPC mode PORT.
 QDRANT_GRPC_PORT: {{ .Values.externalQdrant.grpc.port | quote }}
-# The DSN for Sentry error reporting. If not set, Sentry error reporting will be disabled.
+
+# The external Pinecone configurations.
+{{- else if .Values.externalPinecone.enabled }}
 {{- else if .Values.externalMilvus.enabled }}
-# Milvus configuration Only available when VECTOR_STORE is `milvus`.
 VECTOR_STORE: milvus
-# Milvus endpoint
 MILVUS_URI: {{ .Values.externalMilvus.uri | quote }}
-# The milvus database
 MILVUS_DATABASE: {{ .Values.externalMilvus.database | quote }}
+
+# The external Pgvector configurations.
 {{- else if .Values.externalPgvector.enabled}}
-# pgvector configurations, only available when VECTOR_STORE is `pgvecto-rs or pgvector`
 VECTOR_STORE: pgvector
 PGVECTOR_HOST: {{ .Values.externalPgvector.address }}
 PGVECTOR_PORT: {{ .Values.externalPgvector.port | toString | quote }}
 PGVECTOR_DATABASE: {{ .Values.externalPgvector.dbName }}
-# DB_USERNAME: {{ .Values.externalPgvector.username | quote }}
-# DB_PASSWORD: {{ .Values.externalPgvector.password | quote }}
+
+# The external Tencent Vector DB configurations.
 {{- else if .Values.externalTencentVectorDB.enabled }}
-# tencent vector configurations, only available when VECTOR_STORE is `tencent`
 VECTOR_STORE: tencent
 TENCENT_VECTOR_DB_URL: {{ .Values.externalTencentVectorDB.url | quote }}
-# TENCENT_VECTOR_DB_API_KEY: {{ .Values.externalTencentVectorDB.apiKey | quote }}
 TENCENT_VECTOR_DB_TIMEOUT: {{ .Values.externalTencentVectorDB.timeout | quote }}
-# TENCENT_VECTOR_DB_USERNAME: {{ .Values.externalTencentVectorDB.username | quote }}
 TENCENT_VECTOR_DB_DATABASE: {{ .Values.externalTencentVectorDB.database | quote }}
 TENCENT_VECTOR_DB_SHARD: {{ .Values.externalTencentVectorDB.shard | quote }}
 TENCENT_VECTOR_DB_REPLICAS: {{ .Values.externalTencentVectorDB.replicas | quote }}
+
+# The external MyScale configurations.
 {{- else if .Values.externalMyScaleDB.enabled}}
-# MyScaleDB vector db configurations, only available when VECTOR_STORE is `myscale`
 VECTOR_STORE: myscale
 MYSCALE_HOST: {{ .Values.externalMyScaleDB.host | quote }}
 MYSCALE_PORT: {{ .Values.externalMyScaleDB.port | toString | quote }}
-# MYSCALE_USER: {{ .Values.externalMyScaleDB.username | quote }}
-# MYSCALE_PASSWORD: {{ .Values.externalMyScaleDB.password | quote }}
 MYSCALE_DATABASE: {{ .Values.externalMyScaleDB.database | quote }}
 MYSCALE_FTS_PARAMS: {{ .Values.externalMyScaleDB.ftsParams | quote }}
+
+# The external TableStore configurations.
 {{- else if .Values.externalTableStore.enabled }}
-# TableStore configurations, only available when VECTOR_STORE is `tablestore`
 VECTOR_STORE: tablestore
 TABLESTORE_ENDPOINT: {{ .Values.externalTableStore.endpoint | quote }}
 TABLESTORE_INSTANCE_NAME: {{ .Values.externalTableStore.instanceName | quote }}
-# TABLESTORE_ACCESS_KEY_ID: {{ .Values.externalTableStore.accessKeyId | quote }}
-# TABLESTORE_ACCESS_KEY_SECRET: {{ .Values.externalTableStore.accessKeySecret | quote }}
+
+# The external Elasticsearch configurations.
 {{- else if .Values.externalElasticsearch.enabled }}
-# Elasticsearch configurations, only available when VECTOR_STORE is `elasticsearch`
 VECTOR_STORE: elasticsearch
 ELASTICSEARCH_HOST: {{ .Values.externalElasticsearch.host | quote }}
 ELASTICSEARCH_PORT: {{ .Values.externalElasticsearch.port | toString | quote }}
+
+# The internal Weaviate configurations.
 {{- else if .Values.weaviate.enabled }}
-# The type of vector store to use. Supported values are `weaviate`, `qdrant`, `milvus`.
 VECTOR_STORE: weaviate
   {{- with .Values.weaviate.service }}
     {{- if and (eq .type "ClusterIP") (not (eq .clusterIP "None"))}}
-# The Weaviate endpoint URL. Only available when VECTOR_STORE is `weaviate`.
-{{/*
-Pitfall: scheme (i.e.) must be supecified, or weviate client won't function as
-it depends on `hostname` from urllib.parse.urlparse will be empty if schema is not specified.
-*/}}
+{{}}
 WEAVIATE_ENDPOINT: {{ printf "http://%s" .name | quote }}
     {{- end }}
   {{- end }}
-# The Weaviate API key.
   {{- if .Values.weaviate.authentication.apikey }}
-# WEAVIATE_API_KEY: {{ first .Values.weaviate.authentication.apikey.allowed_keys }}
   {{- end }}
 {{- end }}
 {{- end }}
 
 {{- define "dify.mail.config" -}}
+# The configurations for sending emails.
 {{- if eq .Values.api.mail.type "resend" }}
-# Mail configuration for resend
 MAIL_TYPE: {{ .Values.api.mail.type | quote }}
 MAIL_DEFAULT_SEND_FROM: {{ .Values.api.mail.defaultSender | quote }}
-# RESEND_API_KEY: {{ .Values.api.mail.resend.apiKey | quote }}
 RESEND_API_URL: {{ .Values.api.mail.resend.apiUrl | quote }}
 {{- else if eq .Values.api.mail.type "smtp" }}
-# Mail configuration for SMTP
 MAIL_TYPE: {{ .Values.api.mail.type | quote }}
 MAIL_DEFAULT_SEND_FROM: {{ .Values.api.mail.defaultSender | quote }}
 SMTP_SERVER: {{ .Values.api.mail.smtp.server | quote }}
 SMTP_PORT: {{ .Values.api.mail.smtp.port | quote }}
-# SMTP_USERNAME: {{ .Values.api.mail.smtp.username | quote }}
-# SMTP_PASSWORD: {{ .Values.api.mail.smtp.password | quote }}
 SMTP_USE_TLS: {{ .Values.api.mail.smtp.tls.enabled | toString | quote }}
 SMTP_OPPORTUNISTIC_TLS: {{ .Values.api.mail.smtp.tls.optimistic | toString | quote }}
 {{- end }}
 {{- end }}
 
 {{- define "dify.sandbox.config" -}}
+# Configuration for the Dify Sandbox service
 GIN_MODE: release
 SANDBOX_PORT: '8194'
 {{- if .Values.ssrfProxy.enabled }}
@@ -452,6 +449,7 @@ HTTPS_PROXY: http://{{ template "dify.ssrfProxy.fullname" .}}:{{ .Values.ssrfPro
 {{- end }}
 
 {{- define "dify.nginx.config.proxy" }}
+# Common proxy settings
 proxy_set_header Host $host;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto $scheme;
@@ -463,6 +461,7 @@ proxy_send_timeout 3600s;
 {{- end }}
 
 {{- define "dify.nginx.config.nginx" }}
+# Default Nginx configuration file
 user  nginx;
 worker_processes  auto;
 {{- if .Values.proxy.log.persistence.enabled }}
@@ -618,47 +617,39 @@ cache_store_log none
 {{- end }}
 {{- end }}
 
-{{- define "dify.pluginDaemon.db.config" -}}
-{{- if .Values.externalPostgres.enabled }}
-DB_HOST: {{ .Values.externalPostgres.address | quote }}
-DB_PORT: {{ .Values.externalPostgres.port | toString | quote }}
-DB_DATABASE: {{ .Values.externalPostgres.database.pluginDaemon | quote }}
-{{- else if .Values.postgresql.enabled }}
-# N.B.: `pluginDaemon` will the very same `PostgresSQL` database as `api`, `worker`,
-# which is NOT recommended for production and subject to possible confliction in the future releases of `dify`
-{{- include "dify.db.config" . }}
-{{- end }}
-{{- end }}
-
 {{- define "dify.pluginDaemon.config" }}
+# Configuration for the Dify Plugin Daemon service
 {{- include "dify.redis.config" . }}
 {{- include "dify.pluginDaemon.db.config" .}}
 {{- include "dify.pluginDaemon.storage.config" .}}
+{{- include "dify.common.config"}}
+{{- include "dify.marketplace.config" . }}
 SERVER_PORT: "5002"
 DB_SSL_MODE: require
 PLUGIN_REMOTE_INSTALLING_HOST: "0.0.0.0"
 PLUGIN_REMOTE_INSTALLING_PORT: "5003"
-EXPOSE_PLUGIN_DEBUGGING_PORT: "5003"
-EXPOSE_PLUGIN_DEBUGGING_HOST: {{ .Values.pluginDaemon.debug.debuggingHost | quote }}
 MAX_PLUGIN_PACKAGE_SIZE: "52428800"
 PLUGIN_STDIO_BUFFER_SIZE: "1024"
 PLUGIN_STDIO_MAX_BUFFER_SIZE: "5242880"
 PLUGIN_STORAGE_LOCAL_ROOT: {{ .Values.pluginDaemon.persistence.mountPath | quote }}
 PLUGIN_WORKING_PATH: {{ printf "%s/cwd" .Values.pluginDaemon.persistence.mountPath | clean | quote }}
 DIFY_INNER_API_URL: "http://{{ template "dify.api.fullname" . }}:{{ .Values.api.service.port }}"
-{{- include "dify.marketplace.config" . }}
 {{- end }}
 
-{{- define "dify.marketplace.config" }}
-{{- if .Values.pluginDaemon.marketplace.enabled }}
-MARKETPLACE_ENABLED: "true"
-MARKETPLACE_API_URL: {{ .Values.api.url.marketplaceApi | quote }}
-{{- else }}
-MARKETPLACE_ENABLED: "false"
+{{- define "dify.pluginDaemon.db.config" -}}
+# The configurations of postgres database connection for Plugin Daemon service.
+{{- if .Values.externalPostgres.enabled }}
+DB_HOST: {{ .Values.externalPostgres.address | quote }}
+DB_PORT: {{ .Values.externalPostgres.port | toString | quote }}
+DB_DATABASE: {{ .Values.externalPostgres.database.pluginDaemon | quote }}
+{{- else if .Values.postgresql.enabled }}
+{{- include "dify.db.config" . }}
 {{- end }}
 {{- end }}
 
 {{- define "dify.pluginDaemon.storage.config" -}}
+# The configurations of file storage for Plugin Daemon service.
+# The external S3 storage configurations.
 {{- if and .Values.externalS3.enabled .Values.externalS3.bucketName.pluginDaemon }}
 PLUGIN_STORAGE_TYPE: aws_s3
 S3_USE_PATH_STYLE: {{ .Values.externalS3.pathStyle | toString | quote }}
@@ -666,39 +657,57 @@ S3_ENDPOINT: {{ .Values.externalS3.endpoint | quote }}
 PLUGIN_STORAGE_OSS_BUCKET: {{ .Values.externalS3.bucketName.pluginDaemon | quote }}
 AWS_REGION: {{ .Values.externalS3.region | quote }}
 S3_USE_AWS_MANAGED_IAM: {{ .Values.externalS3.useIAM | toString | quote }}
+
+# The external OSS storage configurations.
 {{- else if and .Values.externalOSS.enabled .Values.externalOSS.bucketName.pluginDaemon }}
 PLUGIN_STORAGE_TYPE: "aliyun_oss"
 ALIYUN_OSS_REGION: {{ .Values.externalOSS.region | quote }}
 ALIYUN_OSS_ENDPOINT: {{ .Values.externalOSS.endpoint | quote }}
 PLUGIN_STORAGE_OSS_BUCKET: {{ .Values.externalOSS.bucketName.pluginDaemon | quote }}
 ALIYUN_OSS_ACCESS_KEY_ID: {{ .Values.externalOSS.accessKey | quote }}
-# ALIYUN_OSS_ACCESS_KEY_SECRET: {{ .Values.externalOSS.secretKey | quote }}
 ALIYUN_OSS_AUTH_VERSION: {{ .Values.externalOSS.authVersion | quote }}
 ALIYUN_OSS_PATH: {{ .Values.externalOSS.path | quote }}
+
+# The external GCS storage configurations.
 {{- else if and .Values.externalGCS.enabled .Values.externalGCS.bucketName.pluginDaemon }}
 PLUGIN_STORAGE_TYPE: "google-storage"
 PLUGIN_STORAGE_OSS_BUCKET: {{ .Values.externalGCS.bucketName.pluginDaemon | quote }}
-# GCS_CREDENTIALS: {{ .Values.externalGCS.serviceAccountJsonBase64 | quote }}
+
+# The external COS storage configurations.
 {{- else if and .Values.externalCOS.enabled .Values.externalCOS.bucketName.pluginDaemon }}
 PLUGIN_STORAGE_TYPE: "tencent_cos"
 TENCENT_COS_SECRET_ID: {{ .Values.externalCOS.secretId | quote }}
 TENCENT_COS_REGION: {{ .Values.externalCOS.region | quote }}
 PLUGIN_STORAGE_OSS_BUCKET: {{ .Values.externalCOS.bucketName.pluginDaemon | quote }}
+
+# The external OBS storage configurations.
 {{- else if and .Values.externalOBS.enabled .Values.externalOBS.bucketName.pluginDaemon }}
 PLUGIN_STORAGE_TYPE: "huawei-obs"
 HUAWEI_OBS_SERVER: {{ .Values.externalOBS.endpoint | quote }}
 PLUGIN_STORAGE_OSS_BUCKET: {{ .Values.externalOBS.bucketName.pluginDaemon | quote }}
 HUAWEI_OBS_ACCESS_KEY: {{ .Values.externalOBS.accessKey | quote }}
-# HUAWEI_OBS_SECRET_KEY: {{ .Values.externalOBS.secretKey | quote }}
+
+# The external TOS storage configurations.
 {{- else if and .Values.externalTOS.enabled .Values.externalTOS.bucketName.pluginDaemon }}
 PLUGIN_STORAGE_TYPE: "volcengine-tos"
 PLUGIN_VOLCENGINE_TOS_ENDPOINT: {{ .Values.externalTOS.endpoint | quote }}
 PLUGIN_VOLCENGINE_TOS_REGION: {{ .Values.externalTOS.region | quote }}
 PLUGIN_STORAGE_OSS_BUCKET: {{ .Values.externalTOS.bucketName.pluginDaemon | quote }}
 PLUGIN_VOLCENGINE_TOS_ACCESS_KEY: {{ .Values.externalTOS.accessKey | quote }}
-# PLUGIN_VOLCENGINE_TOS_SECRET_KEY: {{ .Values.externalTOS.secretKey | quote }}
+
+# The local storage configurations.
 {{- else }}
 PLUGIN_STORAGE_TYPE: local
 STORAGE_LOCAL_PATH: {{ .Values.pluginDaemon.persistence.mountPath | quote }}
+{{- end }}
+{{- end }}
+
+{{- define "dify.marketplace.config" }}
+# The configurations for marketplace integration.
+{{- if .Values.pluginDaemon.marketplace.enabled }}
+MARKETPLACE_ENABLED: "true"
+MARKETPLACE_API_URL: {{ .Values.api.url.marketplaceApi | quote }}
+{{- else }}
+MARKETPLACE_ENABLED: "false"
 {{- end }}
 {{- end }}
