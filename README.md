@@ -155,5 +155,5 @@ helm install <app_name> ./DifyOnAKS/charts/ \
 --set externalPgvector.address='<pg_host>' \
 --set externalPgvector.username=postgres \
 --set externalPgvector.password='<pg_password>' \
---set externalPgvector.dbName=dify
+--set externalPgvector.dbName=dify_vector
 ```
