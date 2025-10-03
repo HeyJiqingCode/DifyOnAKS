@@ -1,5 +1,5 @@
 ## DifyOnAKS
-Deploy [langgenius/dify](https://github.com/langgenius/dify) on AKS(Azure Kubernetes Services) with helm chart.
+Helm charts for deploying [langgenius/dify](https://github.com/langgenius/dify) on Azure, using services such as Azure Kubernetes Service (AKS), Azure Storage Account, Azure Cache for Redis, Azure Database for PostgreSQL, etc.
 
 ## Default Values
 <table>
@@ -134,10 +134,10 @@ kubectl create secret tls certs-dify --cert=/root/tls.crt --key=/root/tls.key
 8) Helm Install Dify
 ```
 helm install <app_name> ./DifyOnAKS/charts/ \
---set image.api.tag=1.8.0 \
---set image.web.tag=1.8.0 \
+--set image.api.tag=1.9.1 \
+--set image.web.tag=1.9.1 \
 --set image.sandbox.tag=0.2.12 \
---set image.pluginDaemon.tag=0.2.0-local \
+--set image.pluginDaemon.tag=0.3.0-local \
 --set api.secretKey=$API_SECRET_KEY \
 --set api.mail.resend.apiKey=$RESEND_API_KEY \
 --set sandbox.auth.apiKey=$CODE_EXECUTION_API_KEY \

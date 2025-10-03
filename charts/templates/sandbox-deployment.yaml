@@ -8,7 +8,6 @@ metadata:
   labels:
 {{- include "dify.labels" . | nindent 4 }}
     component: sandbox
-    # app: {{ template "dify.sandbox.fullname" . }}
 {{ include "dify.ud.labels" . | indent 4 }}
   name: {{ template "dify.sandbox.fullname" . }}
 spec:
